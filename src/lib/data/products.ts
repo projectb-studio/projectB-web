@@ -8,7 +8,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "handmade",
     badge: null,
     slug: "ceramic-vase-matte-black",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "2",
@@ -17,7 +17,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "fabric",
     badge: "NEW",
     slug: "linen-table-runner-ivory",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "3",
@@ -26,7 +26,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "metal",
     badge: null,
     slug: "brass-candle-holder-set",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1602523961358-f9f03dd557db?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "4",
@@ -35,7 +35,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "fabric",
     badge: "BEST",
     slug: "wool-felt-coaster-4p",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "5",
@@ -44,7 +44,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "wood",
     badge: null,
     slug: "oak-wood-tray-natural",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "6",
@@ -54,7 +54,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "fabric",
     badge: "SALE",
     slug: "cotton-blend-napkin-set",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "7",
@@ -63,7 +63,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "stone",
     badge: "NEW",
     slug: "stone-incense-holder",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1600056809880-a46e89b2e704?w=600&h=600&fit=crop&crop=center",
   },
   {
     id: "8",
@@ -72,7 +72,7 @@ const DUMMY_PRODUCTS: Product[] = [
     tag: "glass",
     badge: null,
     slug: "hand-blown-glass-cup",
-    imageUrl: "/images/placeholder-product.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1514651029227-c09ada3d8a33?w=600&h=600&fit=crop&crop=center",
   },
 ];
 

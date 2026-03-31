@@ -11,6 +11,9 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
+      <div className="max-w-content mx-auto px-6 lg:px-12">
+        <div className="h-px bg-pb-light-gray/40" />
+      </div>
       <ProductGridSection
         title={SECTION_TITLES.newIn}
         products={newProducts}

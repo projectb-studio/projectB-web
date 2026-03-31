@@ -12,6 +12,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.supabase.co",
       },
+      {
+        // Unsplash — temporary placeholder images
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   // Strict mode for catching bugs early

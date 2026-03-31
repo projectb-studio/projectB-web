@@ -18,13 +18,13 @@ export function ProductGridSection({
   variant = "vertical",
 }: ProductGridSectionProps) {
   return (
-    <section className="py-12 lg:py-16 px-6 lg:px-12 max-w-content mx-auto">
+    <section className="py-16 lg:py-24 px-6 lg:px-12 max-w-content mx-auto">
       {/* Section header */}
-      <div className="flex items-center justify-between mb-6 lg:mb-8">
+      <div className="flex items-center justify-between mb-8 lg:mb-12">
         <h2 className="heading-section">{title}</h2>
         <Link
           href={viewAllHref}
-          className="flex items-center gap-1 text-xs text-pb-jet-black uppercase tracking-industrial hover:text-pb-gray transition-colors"
+          className="flex items-center gap-1.5 text-xs text-pb-gray uppercase tracking-industrial hover:text-pb-jet-black transition-colors"
         >
           {VIEW_ALL_LABEL}
           <ArrowRight size={14} strokeWidth={1.5} />
@@ -32,7 +32,7 @@ export function ProductGridSection({
       </div>
 
       {/* Product grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} variant={variant} />
         ))}
