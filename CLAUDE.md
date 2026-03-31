@@ -413,7 +413,21 @@ Social login providers to configure:
 
 ---
 
-## 13. Coding Conventions
+## 13. Model Usage Convention
+
+토큰 비용 최적화를 위해 단계별로 모델을 전환해 사용한다.
+세션 전환은 `/model` 명령어로 수동으로 진행한다.
+
+| 단계 | 모델 | 전환 명령 | 해당 작업 |
+|------|------|-----------|-----------|
+| 설계·분석 | Opus | `/model opus` | 브레인스토밍, 아키텍처 설계, 스펙 작성, 코드 리뷰 |
+| 구현·테스트 | Sonnet | `/model sonnet` | 코드 작성, 버그 수정, 테스트 실행 |
+
+> 기본값(settings.json): `sonnet` — 새 세션은 항상 Sonnet으로 시작.
+
+---
+
+## 14. Coding Conventions
 
 ### Rules
 - Language: TypeScript strict mode (`"strict": true`)
@@ -426,6 +440,9 @@ Social login providers to configure:
 - Forms: React Hook Form (to be added when needed)
 - Icons: lucide-react only
 - Imports: Use `@/*` alias (maps to `./src/*`)
+- 모든 설명, 요약, TODO, 커밋 메시지 초안, 코드 주석은 기본적으로 한국어로 작성한다.
+- 사용자에게 보여지는 UI 텍스트는 한국어를 기본으로 한다.
+- 영어는 코드 식별자, 라이브러리 이름, 공식 고유명사에만 사용한다.
 
 ### File Naming
 - Components: PascalCase (`ProductCard.tsx`)
@@ -451,7 +468,7 @@ import { cn } from "@/lib/utils";
 
 ---
 
-## 14. Business Context
+## 15. Business Context
 
 ### Client (사장님) Info
 - 비개발자 — 모든 사장님 향 자료는 쉬운 용어로
@@ -479,7 +496,7 @@ import { cn } from "@/lib/utils";
 
 ---
 
-## 15. Don'ts (절대 하지 말 것)
+## 16. Don'ts (절대 하지 말 것)
 
 - ❌ Generic AI aesthetic (Inter font, purple gradients, rounded everything)
 - ❌ border-radius on ANY element (this is industrial minimal)
@@ -494,7 +511,7 @@ import { cn } from "@/lib/utils";
 
 ---
 
-## 16. Reference Files (from planning phase)
+## 17. Reference Files (from planning phase)
 
 These files exist in the project planning repo:
 - `project-b-wireframe.jsx` — Interactive wireframe (6 pages: home, shop, detail, cart, brand, store)
