@@ -72,22 +72,46 @@ export function ProductCard({ product, variant = "vertical" }: ProductCardProps)
 
       {/* Info — horizontal layout (Best Sellers) */}
       {variant === "horizontal" && (
-        <div className="mt-3 flex items-start justify-between gap-2">
-          <div className="min-w-0">
+        <>
+          {/* Mobile: vertical fallback (2-column grid is too narrow for side-by-side) */}
+          <div className="mt-3 space-y-1 sm:hidden">
+            <p className="text-xs text-pb-gray uppercase tracking-industrial">{tag}</p>
             <p className="text-sm text-pb-jet-black line-clamp-2 leading-snug">{name}</p>
-            <p className="text-xs text-pb-gray uppercase tracking-industrial mt-0.5">{tag}</p>
+            <div className="flex items-center gap-2">
+              {salePrice ? (
+                <>
+                  <span className="text-sm font-medium text-accent-sale">
+                    {formatPrice(salePrice)}
+                  </span>
+                  <span className="text-xs text-pb-gray line-through">
+                    {formatPrice(price)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm font-medium text-pb-jet-black">
+                  {formatPrice(price)}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="shrink-0 text-right">
-            {salePrice ? (
-              <>
-                <p className="text-sm font-medium text-accent-sale">{formatPrice(salePrice)}</p>
-                <p className="text-xs text-pb-gray line-through">{formatPrice(price)}</p>
-              </>
-            ) : (
-              <p className="text-sm font-medium text-pb-jet-black">{formatPrice(price)}</p>
-            )}
+          {/* Desktop: horizontal name + price side-by-side */}
+          <div className="hidden sm:flex mt-3 items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm text-pb-jet-black line-clamp-2 leading-snug">{name}</p>
+              <p className="text-xs text-pb-gray uppercase tracking-industrial mt-0.5">{tag}</p>
+            </div>
+            <div className="shrink-0 text-right">
+              {salePrice ? (
+                <>
+                  <p className="text-sm font-medium text-accent-sale">{formatPrice(salePrice)}</p>
+                  <p className="text-xs text-pb-gray line-through">{formatPrice(price)}</p>
+                </>
+              ) : (
+                <p className="text-sm font-medium text-pb-jet-black">{formatPrice(price)}</p>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </Link>
   );
