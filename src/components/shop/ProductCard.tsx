@@ -1,8 +1,6 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/database";
 
 interface ProductCardProps {
@@ -57,15 +55,15 @@ export function ProductCard({ product, variant = "vertical" }: ProductCardProps)
             {salePrice ? (
               <>
                 <span className="text-sm font-medium text-accent-sale">
-                  ₩{salePrice.toLocaleString()}
+                  {formatPrice(salePrice)}
                 </span>
                 <span className="text-xs text-pb-gray line-through">
-                  ₩{price.toLocaleString()}
+                  {formatPrice(price)}
                 </span>
               </>
             ) : (
               <span className="text-sm font-medium text-pb-jet-black">
-                ₩{price.toLocaleString()}
+                {formatPrice(price)}
               </span>
             )}
           </div>
@@ -82,11 +80,11 @@ export function ProductCard({ product, variant = "vertical" }: ProductCardProps)
           <div className="shrink-0 text-right">
             {salePrice ? (
               <>
-                <p className="text-sm font-medium text-accent-sale">₩{salePrice.toLocaleString()}</p>
-                <p className="text-xs text-pb-gray line-through">₩{price.toLocaleString()}</p>
+                <p className="text-sm font-medium text-accent-sale">{formatPrice(salePrice)}</p>
+                <p className="text-xs text-pb-gray line-through">{formatPrice(price)}</p>
               </>
             ) : (
-              <p className="text-sm font-medium text-pb-jet-black">₩{price.toLocaleString()}</p>
+              <p className="text-sm font-medium text-pb-jet-black">{formatPrice(price)}</p>
             )}
           </div>
         </div>
