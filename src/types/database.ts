@@ -56,3 +56,17 @@ export type Database = {
     Enums: Record<string, never>;
   };
 };
+
+export type ProductTag = "handmade" | "fabric" | "metal" | "wood" | "stone" | "glass";
+export type ProductBadge = "NEW" | "BEST" | "SALE" | "HANDMADE" | null;
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  salePrice?: number;
+  tag: ProductTag;
+  badge?: ProductBadge;
+  slug: string;
+  imageUrl: string;
+}
