@@ -1,0 +1,188 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================
+   Project B — Industrial Minimal Design System
+   ================================================ */
+
+@layer base {
+  :root {
+    /* Core palette */
+    --pb-jet-black: #0A0A0A;
+    --pb-rich-black: #1A1A1A;
+    --pb-charcoal: #333333;
+    --pb-gray: #666666;
+    --pb-silver: #999999;
+    --pb-light-gray: #D4D4D4;
+    --pb-off-white: #F0F0F0;
+    --pb-snow: #FAFAFA;
+
+    /* Semantic */
+    --pb-accent-sale: #C75050;
+    --pb-accent-success: #2D8F4E;
+
+    /* Foreground / Background */
+    --pb-foreground: var(--pb-jet-black);
+    --pb-background: var(--pb-snow);
+    --pb-muted: var(--pb-gray);
+    --pb-border: var(--pb-light-gray);
+  }
+
+  /* Dark mode (optional, for admin later) */
+  .dark {
+    --pb-foreground: var(--pb-snow);
+    --pb-background: var(--pb-jet-black);
+    --pb-muted: var(--pb-silver);
+    --pb-border: var(--pb-charcoal);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Pretendard Variable", "Pretendard", sans-serif;
+    color: var(--pb-foreground);
+    background-color: var(--pb-background);
+    line-height: 1.6;
+  }
+
+  /* Industrial: all corners sharp */
+  * {
+    border-radius: 0 !important;
+  }
+}
+
+@layer components {
+  /* Heading typography — uppercase, wide letter-spacing */
+  .heading-display {
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+
+  .heading-section {
+    font-family: "Archivo", sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  /* Button base */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    background-color: var(--pb-jet-black);
+    color: var(--pb-snow);
+    font-family: "Archivo", sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--pb-snow);
+    color: var(--pb-jet-black);
+    border-color: var(--pb-jet-black);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    background-color: transparent;
+    color: var(--pb-jet-black);
+    font-family: "Archivo", sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border: 1px solid var(--pb-jet-black);
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--pb-jet-black);
+    color: var(--pb-snow);
+  }
+
+  /* Badge system */
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    font-family: "Archivo", sans-serif;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .badge-new {
+    background-color: var(--pb-jet-black);
+    color: var(--pb-snow);
+  }
+
+  .badge-best {
+    background-color: var(--pb-off-white);
+    color: var(--pb-jet-black);
+    border: 1px solid var(--pb-light-gray);
+  }
+
+  .badge-sale {
+    background-color: var(--pb-accent-sale);
+    color: white;
+  }
+
+  .badge-handmade {
+    background-color: transparent;
+    color: var(--pb-jet-black);
+    border: 1px solid var(--pb-jet-black);
+  }
+
+  /* Divider */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--pb-border);
+  }
+
+  /* Product image container (1:1 ratio) */
+  .product-image {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--pb-off-white);
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
