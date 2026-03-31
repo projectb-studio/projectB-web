@@ -57,13 +57,16 @@ export type Database = {
   };
 };
 
+export type ProductTag = "handmade" | "fabric" | "metal" | "wood" | "stone" | "glass";
+export type ProductBadge = "NEW" | "BEST" | "SALE" | "HANDMADE" | null;
+
 export interface Product {
   id: string;
   name: string;
   price: number;
   salePrice?: number;
-  tag: string;
-  badge?: string | null;
+  tag: ProductTag;
+  badge?: ProductBadge;
   slug: string;
   imageUrl: string;
 }

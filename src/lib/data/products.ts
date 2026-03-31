@@ -49,8 +49,8 @@ const DUMMY_PRODUCTS: Product[] = [
   {
     id: "6",
     name: "Cotton blend napkin set",
-    price: 22000,
-    salePrice: 27500,
+    price: 27500,
+    salePrice: 22000,
     tag: "fabric",
     badge: "SALE",
     slug: "cotton-blend-napkin-set",
