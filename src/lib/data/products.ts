@@ -79,9 +79,11 @@ const DUMMY_PRODUCTS: Product[] = [
 // Returns products for the "New In" section
 // When Supabase is ready, replace the body of this function only
 export async function getNewProducts(): Promise<Product[]> {
-  return DUMMY_PRODUCTS.filter(
-    (p) => p.badge === "NEW" || p.badge === null
-  ).slice(0, 4);
+  // Returns the newest products (badge NEW first, then others by recency)
+  // When Supabase is ready, replace with: ORDER BY created_at DESC LIMIT 4
+  const newBadge = DUMMY_PRODUCTS.filter((p) => p.badge === "NEW");
+  const others = DUMMY_PRODUCTS.filter((p) => p.badge !== "NEW");
+  return [...newBadge, ...others].slice(0, 4);
 }
 
 // Returns products for the "Best Sellers" section

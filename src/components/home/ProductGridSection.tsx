@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { VIEW_ALL_LABEL } from "@/constants/home";
 import type { Product } from "@/types/database";
 
 interface ProductGridSectionProps {
@@ -25,7 +26,7 @@ export function ProductGridSection({
           href={viewAllHref}
           className="flex items-center gap-1 text-xs text-pb-jet-black uppercase tracking-industrial hover:text-pb-gray transition-colors"
         >
-          View all
+          {VIEW_ALL_LABEL}
           <ArrowRight size={14} strokeWidth={1.5} />
         </Link>
       </div>

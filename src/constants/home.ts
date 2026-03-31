@@ -23,3 +23,5 @@ export const SECTION_TITLES = {
   newIn: "NEW IN",
   bestSellers: "BEST SELLERS",
 } as const;
+
+export const VIEW_ALL_LABEL = "전체 보기" as const;
