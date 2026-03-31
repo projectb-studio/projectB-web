@@ -56,3 +56,14 @@ export type Database = {
     Enums: Record<string, never>;
   };
 };
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  salePrice?: number;
+  tag: string;
+  badge?: string | null;
+  slug: string;
+  imageUrl: string;
+}
