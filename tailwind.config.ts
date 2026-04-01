@@ -8,21 +8,22 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // Project B: Industrial Minimal Palette
+      // Project B: Terracotta + Beige Palette
       colors: {
         pb: {
-          "jet-black": "#0A0A0A",
-          "rich-black": "#1A1A1A",
-          charcoal: "#333333",
-          gray: "#666666",
-          silver: "#999999",
-          "light-gray": "#D4D4D4",
-          "off-white": "#F0F0F0",
-          snow: "#FAFAFA",
+          "jet-black": "#3B2820",
+          "rich-black": "#6B4A3A",
+          charcoal: "#6B4A3A",
+          gray: "#8B7355",
+          silver: "#B5A48C",
+          "light-gray": "#D9C9AE",
+          "off-white": "#F2ECE2",
+          snow: "#FAF7F2",
         },
         accent: {
           sale: "#C75050",
-          success: "#2D8F4E",
+          success: "#4A7C59",
+          terracotta: "#B5704F",
         },
       },
       // Typography
@@ -34,9 +35,11 @@ const config: Config = {
         industrial: "0.15em",
         wide: "0.25em",
       },
-      // No border-radius (industrial)
+      // Soft corners
       borderRadius: {
-        none: "0px",
+        DEFAULT: "4px",
+        sm: "2px",
+        md: "6px",
       },
       // Spacing system
       spacing: {
