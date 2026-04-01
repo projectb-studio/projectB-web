@@ -9,19 +9,19 @@ export const metadata: Metadata = {
 
 const VALUES = [
   {
-    title: "Designed with care",
+    title: "Premium Fabric",
     description:
-      "Every piece begins with careful thought — form, function, and feeling considered equally. We design objects that earn their place in your everyday life.",
+      "퍼, 무스탕, 레더, 나일론, 면까지. 의류에 쓰이는 프리미엄 소재를 공간 소품에 입혀 질감이 살아있는 새로운 경험을 만듭니다.",
   },
   {
-    title: "Made by hand",
+    title: "Styled with Care",
     description:
-      "Our artisans bring decades of experience to each creation. The subtle imperfections in every handmade piece are not flaws — they are signatures.",
+      "오랜 시간 원단과 컬러를 다뤄온 전문가의 안목으로 공간을 스타일링합니다. 트렌디하면서도 편안한 무드를 제안합니다.",
   },
   {
-    title: "Built to last",
+    title: "Blessing Your Space",
     description:
-      "We choose materials for their character and endurance. Quality over quantity — fewer things, better made, kept for longer.",
+      "당신이 머무는 모든 공간에 축복 같은 따뜻함이 깃들기를 바라는 마음. 일상을 가장 당신답게 만드는 맞춤옷입니다.",
   },
 ] as const;
 
@@ -32,7 +32,7 @@ export default function BrandPage() {
       <div className="bg-pb-off-white py-20 lg:py-32">
         <div className="max-w-content mx-auto px-6 lg:px-12 text-center">
           <p className="text-[10px] text-pb-silver uppercase tracking-[0.3em] mb-6">
-            Our Story
+            Blessing Project
           </p>
           <h1 className="heading-display text-3xl lg:text-5xl tracking-wide">
             PROJECT B
@@ -41,22 +41,30 @@ export default function BrandPage() {
       </div>
 
       {/* Story */}
-      <section className="max-w-[560px] mx-auto px-6 py-16 lg:py-24">
-        <div className="space-y-6 text-sm text-pb-charcoal leading-relaxed text-center">
+      <section className="max-w-[640px] mx-auto px-6 py-16 lg:py-24">
+        <h2 className="text-base lg:text-lg font-medium text-center mb-10 leading-snug">
+          공간에 입히는 나만의 감각, projectB
+        </h2>
+        <div className="space-y-8 text-sm text-pb-charcoal leading-[1.9]">
           <p>
-            PROJECT B는 손으로 만든 것들의 가치를 믿습니다.
-            대량 생산의 시대에, 우리는 한 사람의 손길이 닿은
-            물건이 가진 고유한 아름다움을 이야기합니다.
+            사람의 분위기를 결정하는 것이 &lsquo;옷&rsquo;이라면, 공간의 무드를 완성하는 것은 &lsquo;소품&rsquo;입니다.
+            projectB는 평범하게 놓여진 일상 속 오브제들에 가장 트렌디하고 감각적인 옷을 입혀주는 라이프스타일 브랜드입니다.
           </p>
           <p>
-            서울의 작은 작업실에서 시작된 PROJECT B는
-            도자기, 패브릭, 금속, 목재, 유리 등 다양한 소재로
-            일상을 풍요롭게 하는 소품들을 만듭니다.
+            오랜 시간 의류 도매를 전개하며 원단과 컬러를 다뤄온 전문가의 섬세한 안목으로 공간을 스타일링합니다.
+            따뜻하고 풍성한 퍼(Fur)와 무스탕, 시크한 레더부터 바스락거리는 나일론과 편안한 면 소재까지.
+            옷을 지을 때 사용하는 프리미엄 소재들을 공간 속으로 가져왔습니다.
           </p>
           <p>
-            하나하나 직접 만든 제품에는 기계가 흉내 낼 수 없는
-            따뜻함이 담겨 있습니다. 그 작은 차이가 공간을, 그리고
-            일상을 바꾸는 힘이 있다고 믿습니다.
+            밋밋했던 티슈케이스에는 포근한 아우터를 입히고, 매일 일상에서 걸치는 앞치마와 잠옷에는 핏과 질감이 살아있는 감각을 더해
+            완전히 새로운 무드로 재해석합니다. 매일 입는 옷처럼 편안하면서도, 특별한 날의 OOTD처럼 시선을 사로잡는 매력적인 텍스처를 경험해 보세요.
+          </p>
+          <p>
+            우리의 이름인 <strong>&lsquo;Blessing Project&rsquo;</strong>에는 당신이 머무는 모든 공간에 축복 같은 따뜻함과 기분 좋은 변화가 깃들기를 바라는 마음을 담았습니다.
+          </p>
+          <p className="text-pb-gray">
+            질감이 살아있는 패브릭, 세련된 컬러감, 그리고 뻔하지 않은 디자인.<br />
+            당신의 공간과 일상이 가장 당신다워질 수 있도록, projectB가 딱 맞는 맞춤옷을 제안합니다.
           </p>
         </div>
       </section>
