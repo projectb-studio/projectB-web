@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, Search, ShoppingBag, User } from "lucide-react";
 import { NAV_ITEMS, SITE_CONFIG } from "@/constants/site";
+import { useCartStore } from "@/stores/cart";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const totalItems = useCartStore((s) => s.totalItems());
+
+  useEffect(() => setMounted(true), []);
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--pb-snow)] border-b border-[var(--pb-border)]">
@@ -64,7 +69,11 @@ export function Header() {
               className="p-2 relative"
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
-              {/* TODO: cart count badge */}
+              {mounted && totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-pb-jet-black text-pb-snow text-[9px] font-heading font-bold flex items-center justify-center">
+                  {totalItems > 99 ? "99" : totalItems}
+                </span>
+              )}
             </Link>
           </div>
         </div>

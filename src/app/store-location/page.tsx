@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Clock, MapPin, Phone, MessageCircle } from "lucide-react";
+import { STORE_INFO } from "@/constants/site";
+import { MapPlaceholder } from "@/components/store/MapPlaceholder";
 
 export const metadata: Metadata = {
   title: "Store Location",
@@ -6,47 +9,116 @@ export const metadata: Metadata = {
 };
 
 export default function StoreLocationPage() {
+  const directionsUrl = `https://map.kakao.com/link/to/PROJECT B,${encodeURIComponent(STORE_INFO.address)}`;
+  const kakaoTalkUrl = `https://pf.kakao.com/${STORE_INFO.kakao}`;
+
   return (
-    <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="heading-section text-sm text-center mb-12">
-        Store Location
-      </h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Map */}
-        <div className="aspect-square lg:aspect-auto lg:h-[500px] bg-[var(--pb-off-white)] flex items-center justify-center">
-          {/* TODO: Kakao Map or Naver Map embed */}
-          <p className="text-[var(--pb-gray)] text-sm">Map</p>
+    <>
+      {/* Header banner */}
+      <div className="bg-pb-jet-black py-16 lg:py-24">
+        <div className="max-w-content mx-auto px-6 lg:px-12 text-center">
+          <h1 className="heading-display text-2xl lg:text-3xl text-pb-snow tracking-wide">
+            Visit Us
+          </h1>
+          <p className="text-sm text-pb-silver mt-4 tracking-industrial uppercase">
+            Experience our craft in person
+          </p>
         </div>
+      </div>
 
-        {/* Store info */}
-        <div className="flex flex-col justify-center">
-          <h2 className="heading-display text-lg mb-6 tracking-[0.2em]">
-            PROJECT B STORE
-          </h2>
-          <div className="space-y-4 text-sm">
-            <div>
-              <p className="text-[var(--pb-gray)] text-xs tracking-[0.1em] uppercase mb-1">
-                Address
-              </p>
-              <p>서울특별시 ○○구 ○○로 000</p>
+      <section className="max-w-content mx-auto px-6 lg:px-12 py-12 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+          {/* Map */}
+          <MapPlaceholder query={STORE_INFO.mapQuery} />
+
+          {/* Store info */}
+          <div className="flex flex-col justify-center">
+            <h2 className="heading-display text-lg mb-10 tracking-wide">
+              {STORE_INFO.name}
+            </h2>
+
+            <div className="space-y-8">
+              {/* Address */}
+              <div className="flex gap-4">
+                <MapPin size={16} strokeWidth={1.5} className="text-pb-silver mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-pb-silver uppercase tracking-industrial mb-1.5">
+                    Address
+                  </p>
+                  <p className="text-sm">{STORE_INFO.address}</p>
+                  <p className="text-xs text-pb-gray mt-0.5">{STORE_INFO.addressEn}</p>
+                </div>
+              </div>
+
+              {/* Hours */}
+              <div className="flex gap-4">
+                <Clock size={16} strokeWidth={1.5} className="text-pb-silver mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-pb-silver uppercase tracking-industrial mb-1.5">
+                    Hours
+                  </p>
+                  {STORE_INFO.hours.map((h) => (
+                    <p key={h.days} className="text-sm">
+                      <span className="font-medium">{h.days}</span>{" "}
+                      <span className="text-pb-gray">{h.time}</span>
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="flex gap-4">
+                <Phone size={16} strokeWidth={1.5} className="text-pb-silver mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-pb-silver uppercase tracking-industrial mb-1.5">
+                    Contact
+                  </p>
+                  <a
+                    href={`tel:${STORE_INFO.phone}`}
+                    className="text-sm hover:text-pb-gray transition-colors"
+                  >
+                    {STORE_INFO.phone}
+                  </a>
+                </div>
+              </div>
+
+              {/* KakaoTalk */}
+              <div className="flex gap-4">
+                <MessageCircle size={16} strokeWidth={1.5} className="text-pb-silver mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-pb-silver uppercase tracking-industrial mb-1.5">
+                    KakaoTalk
+                  </p>
+                  <p className="text-sm">{STORE_INFO.kakao}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[var(--pb-gray)] text-xs tracking-[0.1em] uppercase mb-1">
-                Hours
-              </p>
-              <p>MON — SAT 11:00 — 20:00</p>
-              <p>SUN & HOLIDAYS CLOSED</p>
-            </div>
-            <div>
-              <p className="text-[var(--pb-gray)] text-xs tracking-[0.1em] uppercase mb-1">
-                Contact
-              </p>
-              <p>02-0000-0000</p>
+
+            {/* Divider */}
+            <div className="h-px bg-pb-light-gray/40 my-10" />
+
+            {/* CTA buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href={directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-center"
+              >
+                Get Directions
+              </a>
+              <a
+                href={kakaoTalkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-center"
+              >
+                KakaoTalk
+              </a>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

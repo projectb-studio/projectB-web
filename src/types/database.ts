@@ -69,4 +69,10 @@ export interface Product {
   badge?: ProductBadge;
   slug: string;
   imageUrl: string;
+  images?: string[];
+  description?: string;
+  details?: string;
+  shipping?: string;
+  care?: string;
+  material?: string;
 }

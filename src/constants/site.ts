@@ -50,3 +50,17 @@ export type ProductTag = (typeof PRODUCT_TAGS)[number];
 export const FREE_SHIPPING_THRESHOLD = 50_000; // 5만원 이상 무료배송
 
 export const ITEMS_PER_PAGE = 12;
+
+export const STORE_INFO = {
+  name: "PROJECT B STORE",
+  address: "서울특별시 중구 다산로 240 동원빌딩",
+  addressEn: "240, Dasan-ro, Jung-gu, Seoul (Dongwon Bldg.)",
+  hours: [
+    { days: "MON — SAT", time: "11:00 — 20:00" },
+    { days: "SUN & HOLIDAYS", time: "CLOSED" },
+  ],
+  phone: "02-0000-0000",
+  kakao: "@projectb",
+  instagram: "@projectb_official",
+  mapQuery: "서울특별시 중구 다산로 240 동원빌딩",
+} as const;
