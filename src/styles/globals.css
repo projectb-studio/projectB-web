@@ -103,6 +103,16 @@
     border-color: #B5704F;
   }
 
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary:disabled:hover {
+    background-color: #B5704F;
+    color: #FAF7F2;
+  }
+
   .btn-secondary {
     display: inline-flex;
     align-items: center;
