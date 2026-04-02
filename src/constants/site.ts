@@ -5,7 +5,7 @@
 export const SITE_CONFIG = {
   name: "PROJECT B",
   description: "Handcrafted accessories & lifestyle goods",
-  url: "https://projectb.kr", // TODO: confirm domain
+  url: "https://projectb.kr",
   locale: "ko-KR",
   currency: "KRW",
 } as const;
@@ -59,8 +59,18 @@ export const STORE_INFO = {
     { days: "MON — SAT", time: "11:00 — 20:00" },
     { days: "SUN & HOLIDAYS", time: "CLOSED" },
   ],
-  phone: "02-0000-0000",
+  phone: "010-2122-0691",
   kakao: "@projectb",
-  instagram: "@projectb_official",
+  instagram: "@project_b_sindang",
+  instagramUrl: "https://www.instagram.com/project_b_sindang",
   mapQuery: "서울특별시 중구 다산로 240 동원빌딩",
+} as const;
+
+export const BUSINESS_INFO = {
+  companyName: "프로젝트비(PROJECT B)",
+  representative: "이기복",
+  businessNumber: "611-43-00831",
+  address: "서울특별시 중구 다산로 240. 1층 102호(신당동, 동원빌딩)",
+  phone: "010-2122-0691",
+  email: "project_b_sindang@naver.com",
 } as const;

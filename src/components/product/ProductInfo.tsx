@@ -5,6 +5,7 @@ import { cn, formatPrice } from "@/lib/utils";
 import { QuantitySelector } from "./QuantitySelector";
 import { Accordion } from "./Accordion";
 import { useCartStore } from "@/stores/cart";
+import { WishlistButton } from "@/components/common/WishlistButton";
 import type { Product } from "@/types/database";
 
 interface ProductInfoProps {
@@ -77,16 +78,23 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <p className="text-xs text-pb-gray uppercase tracking-industrial mb-2">Quantity</p>
           <QuantitySelector onChange={setQuantity} />
         </div>
-        <button
-          className="btn-primary w-full"
-          onClick={() => {
-            addItem(product, quantity);
-            setAdded(true);
-            setTimeout(() => setAdded(false), 1500);
-          }}
-        >
-          {added ? "Added!" : "Add to cart"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            className="btn-primary flex-1"
+            onClick={() => {
+              addItem(product, quantity);
+              setAdded(true);
+              setTimeout(() => setAdded(false), 1500);
+            }}
+          >
+            {added ? "Added!" : "Add to cart"}
+          </button>
+          <WishlistButton
+            product={product}
+            size={22}
+            className="flex items-center justify-center w-12 border border-[var(--pb-light-gray)] hover:border-[var(--pb-jet-black)] transition-colors"
+          />
+        </div>
       </div>
 
       {/* Accordion */}

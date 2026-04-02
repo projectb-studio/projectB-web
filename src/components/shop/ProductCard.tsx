@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn, formatPrice } from "@/lib/utils";
+import { WishlistButton } from "@/components/common/WishlistButton";
 import type { Product } from "@/types/database";
 
 interface ProductCardProps {
@@ -58,6 +59,10 @@ export function ProductCard({ product, variant = "vertical" }: ProductCardProps)
             {badge}
           </span>
         )}
+        <WishlistButton
+          product={product}
+          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+        />
       </div>
 
       {/* Info — vertical layout (default, New In) */}

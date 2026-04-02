@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { SITE_CONFIG, FOOTER_LINKS } from "@/constants/site";
+import { Instagram } from "lucide-react";
+import { SITE_CONFIG, FOOTER_LINKS, STORE_INFO, BUSINESS_INFO } from "@/constants/site";
 
 export function Footer() {
   return (
@@ -15,6 +16,17 @@ export function Footer() {
               Handcrafted accessories
               <br />& lifestyle goods
             </p>
+            <div className="flex gap-4 mt-6">
+              <a
+                href={STORE_INFO.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--pb-silver)] hover:text-[var(--pb-snow)] transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram size={20} />
+              </a>
+            </div>
           </div>
 
           {/* CS */}
@@ -55,12 +67,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal + SNS */}
+          {/* Legal */}
           <div>
             <h3 className="font-heading text-xs tracking-[0.15em] uppercase text-[var(--pb-snow)] mb-4">
               Legal
             </h3>
-            <ul className="space-y-2 mb-8">
+            <ul className="space-y-2">
               {FOOTER_LINKS.legal.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -72,30 +84,23 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-            <div className="flex gap-4">
-              {/* TODO: Instagram, KakaoTalk icons */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm hover:text-[var(--pb-snow)] transition-colors"
-              >
-                Instagram
-              </a>
-            </div>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="mt-16 pt-8 border-t border-[var(--pb-charcoal)]">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-[var(--pb-gray)]">
-              © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights
-              reserved.
+          <div className="flex flex-col gap-3 text-xs text-[var(--pb-gray)]">
+            <p>
+              {BUSINESS_INFO.companyName} | 대표: {BUSINESS_INFO.representative} | 사업자등록번호: {BUSINESS_INFO.businessNumber}
             </p>
-            <p className="text-xs text-[var(--pb-gray)]">
-              사업자등록번호: 000-00-00000 | 통신판매업신고:
-              제0000-서울강남-0000호
+            <p>
+              {BUSINESS_INFO.address}
+            </p>
+            <p>
+              전화: {BUSINESS_INFO.phone} | 이메일: {BUSINESS_INFO.email}
+            </p>
+            <p className="mt-2">
+              &copy; {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
             </p>
           </div>
         </div>
