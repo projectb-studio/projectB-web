@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Package, Heart, UserIcon, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useWishlistStore } from "@/stores/wishlist";
+import { ProductCard } from "@/components/shop/ProductCard";
+import { useUser } from "@/hooks/useUser";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const TABS = [
   { id: "orders", label: "Orders", icon: Package },
@@ -32,10 +38,25 @@ function OrdersTab() {
 }
 
 function WishlistTab() {
-  return <EmptyState message="위시리스트가 비어있습니다." cta={{ label: "Browse Products", href: "/shop" }} />;
+  const items = useWishlistStore((s) => s.items);
+
+  if (items.length === 0) {
+    return <EmptyState message="위시리스트가 비어있습니다." cta={{ label: "Browse Products", href: "/shop" }} />;
+  }
+
+  return (
+    <div className="py-4">
+      <p className="text-xs text-pb-gray mb-6">{items.length}개의 상품</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {items.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
-function ProfileTab() {
+function ProfileTab({ user }: { user: User | null }) {
   return (
     <div className="max-w-md space-y-4 py-4">
       <div>
@@ -43,6 +64,7 @@ function ProfileTab() {
         <input
           type="text"
           placeholder="이름"
+          defaultValue={user?.user_metadata?.full_name ?? ""}
           className="w-full border border-pb-light-gray px-3 py-2.5 text-sm focus:border-pb-jet-black focus:outline-none transition-colors"
         />
       </div>
@@ -51,6 +73,7 @@ function ProfileTab() {
         <input
           type="email"
           placeholder="email@example.com"
+          value={user?.email ?? ""}
           disabled
           className="w-full border border-pb-light-gray px-3 py-2.5 text-sm bg-pb-off-white text-pb-silver"
         />
@@ -84,17 +107,41 @@ function PointsTab() {
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState<TabId>("orders");
+  const { user, loading } = useUser();
+  const router = useRouter();
+  const supabase = createClient();
 
-  // TODO: Redirect to /auth if not logged in (Supabase Auth check)
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-pb-gray text-sm">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <section className="max-w-content mx-auto px-6 lg:px-12 py-12 lg:py-20">
-      <h1 className="heading-display text-sm text-center tracking-wide mb-10">
+      <h1 className="heading-display text-sm text-center tracking-wide mb-2">
         My Page
       </h1>
+      <p className="text-sm text-pb-gray text-center">{user?.email}</p>
+      <div className="flex justify-center">
+        <button
+          onClick={handleLogout}
+          className="text-xs text-pb-silver hover:text-pb-gray tracking-wider uppercase mt-3 transition-colors"
+        >
+          로그아웃
+        </button>
+      </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-pb-light-gray mb-8 overflow-x-auto no-scrollbar">
+      <div className="flex border-b border-pb-light-gray mb-8 mt-10 overflow-x-auto no-scrollbar">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -118,7 +165,7 @@ export default function MyPage() {
       {/* Tab content */}
       {activeTab === "orders" && <OrdersTab />}
       {activeTab === "wishlist" && <WishlistTab />}
-      {activeTab === "profile" && <ProfileTab />}
+      {activeTab === "profile" && <ProfileTab user={user} />}
       {activeTab === "points" && <PointsTab />}
     </section>
   );
