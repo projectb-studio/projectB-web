@@ -14,7 +14,7 @@ export const HERO_SLIDES: HeroSlide[] = [
 export const HERO_CONTENT = {
   heading: "PROJECT B",
   subtext: "Curated accessories for mindful living",
-  primaryCta: { label: "SHOP ONLINE", href: "/shop" },
+  primaryCta: { label: "SHOP ONLINE", href: "/category" },
   secondaryCta: { label: "VISIT STORE", href: "/store-location" },
 } as const;
 

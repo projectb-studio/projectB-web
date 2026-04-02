@@ -63,7 +63,7 @@ function OrdersTab() {
   }
 
   if (orders.length === 0) {
-    return <EmptyState message="주문 내역이 없습니다." cta={{ label: "쇼핑하러 가기", href: "/shop" }} />;
+    return <EmptyState message="주문 내역이 없습니다." cta={{ label: "쇼핑하러 가기", href: "/category" }} />;
   }
 
   const statusLabels: Record<string, string> = {
@@ -104,7 +104,7 @@ function WishlistTab() {
   const items = useWishlistStore((s) => s.items);
 
   if (items.length === 0) {
-    return <EmptyState message="위시리스트가 비어있습니다." cta={{ label: "Browse Products", href: "/shop" }} />;
+    return <EmptyState message="위시리스트가 비어있습니다." cta={{ label: "Browse Products", href: "/category" }} />;
   }
 
   return (

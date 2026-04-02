@@ -27,7 +27,7 @@ export default function OrderCompletePage() {
         <Link href="/mypage" className="btn-primary">
           View Orders
         </Link>
-        <Link href="/shop" className="btn-secondary">
+        <Link href="/category" className="btn-secondary">
           Continue Shopping
         </Link>
       </div>

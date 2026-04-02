@@ -66,7 +66,7 @@ export default function CheckoutPage() {
         <ShoppingBag size={40} strokeWidth={1} className="mx-auto text-pb-silver mb-6" />
         <h1 className="heading-display text-sm tracking-wide mb-4">No items to checkout</h1>
         <p className="text-sm text-pb-gray mb-8">장바구니에 상품을 담아주세요.</p>
-        <Link href="/shop" className="btn-primary">Shop Now</Link>
+        <Link href="/category" className="btn-primary">Shop Now</Link>
       </section>
     );
   }

@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shop/Pagination";
 import type { ProductTag } from "@/types/database";
 
 export const metadata: Metadata = {
-  title: "Shop",
+  title: "Category",
   description: "모든 핸드메이드 소품을 만나보세요.",
 };
 
@@ -20,7 +20,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const currentPage = Math.max(1, Number(params.page) || 1);
 
   const { products, total, totalPages } = await getProducts(activeTag, currentPage);
-  const baseHref = activeTag === "all" ? "/shop" : `/shop?tag=${activeTag}`;
+  const baseHref = activeTag === "all" ? "/category" : `/category?tag=${activeTag}`;
 
   return (
     <section className="max-w-content mx-auto px-6 lg:px-12 py-12 lg:py-20">

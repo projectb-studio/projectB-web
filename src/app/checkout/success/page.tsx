@@ -88,7 +88,7 @@ function SuccessContent() {
         <Link href="/mypage" className="btn-secondary">
           주문내역 보기
         </Link>
-        <Link href="/shop" className="btn-primary">
+        <Link href="/category" className="btn-primary">
           쇼핑 계속하기
         </Link>
       </div>

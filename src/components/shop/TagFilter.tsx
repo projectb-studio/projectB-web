@@ -13,7 +13,7 @@ export function TagFilter({ activeTag }: TagFilterProps) {
     <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1">
       {PRODUCT_TAGS.map((tag) => {
         const isActive = tag === activeTag;
-        const href = tag === "all" ? "/shop" : `/shop?tag=${tag}`;
+        const href = tag === "all" ? "/category" : `/category?tag=${tag}`;
 
         return (
           <Link

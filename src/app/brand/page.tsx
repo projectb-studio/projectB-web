@@ -133,7 +133,7 @@ export default function BrandPage() {
           Discover our collection
         </p>
         <div className="flex items-center justify-center gap-3">
-          <Link href="/shop" className="btn-primary">
+          <Link href="/category" className="btn-primary">
             Shop Online
           </Link>
           <Link href="/store-location" className="btn-secondary">

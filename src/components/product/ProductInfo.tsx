@@ -5,6 +5,7 @@ import { cn, formatPrice } from "@/lib/utils";
 import { QuantitySelector } from "./QuantitySelector";
 import { Accordion } from "./Accordion";
 import { useCartStore } from "@/stores/cart";
+import { ChevronDown } from "lucide-react";
 import { WishlistButton } from "@/components/common/WishlistButton";
 import type { Product } from "@/types/database";
 
@@ -95,6 +96,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
             className="flex items-center justify-center w-12 border border-[var(--pb-light-gray)] hover:border-[var(--pb-jet-black)] transition-colors"
           />
         </div>
+        {/* Review shortcut */}
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-xs text-[var(--pb-gray)] hover:text-[var(--pb-jet-black)] transition-colors"
+          onClick={() => {
+            document
+              .getElementById("reviews")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          리뷰 보기
+          <ChevronDown size={14} strokeWidth={1.5} />
+        </button>
       </div>
 
       {/* Accordion */}

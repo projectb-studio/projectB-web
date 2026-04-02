@@ -44,7 +44,7 @@ export function OrderSummary() {
       </Link>
 
       <Link
-        href="/shop"
+        href="/category"
         className="block text-center text-xs text-pb-gray uppercase tracking-industrial hover:text-pb-jet-black transition-colors"
       >
         Continue Shopping

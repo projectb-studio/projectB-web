@@ -11,18 +11,17 @@ export const SITE_CONFIG = {
 } as const;
 
 export const NAV_ITEMS = [
-  { label: "SHOP", href: "/shop" },
+  { label: "CATEGORY", href: "/category" },
   { label: "BRAND", href: "/brand" },
   { label: "MAGAZINE", href: "/magazine" },
   { label: "STORE", href: "/store-location" },
-  { label: "REVIEWS", href: "/reviews" },
 ] as const;
 
 export const FOOTER_LINKS = {
   cs: [
     { label: "FAQ", href: "/cs?tab=faq" },
-    { label: "1:1 문의", href: "/cs?tab=inquiry" },
-    { label: "교환/반품", href: "/cs?tab=return" },
+    { label: "Q&A", href: "/cs?tab=qna" },
+    { label: "기타 문의", href: "/cs?tab=etc" },
   ],
   info: [
     { label: "브랜드 소개", href: "/brand" },

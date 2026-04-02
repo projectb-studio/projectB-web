@@ -14,13 +14,13 @@ export default async function HomePage() {
       <ProductGridSection
         title={SECTION_TITLES.newIn}
         products={newProducts}
-        viewAllHref="/shop"
+        viewAllHref="/category"
       />
       <BrandStoreCta />
       <ProductGridSection
         title={SECTION_TITLES.bestSellers}
         products={bestSellers}
-        viewAllHref="/shop"
+        viewAllHref="/category"
         variant="horizontal"
       />
     </>

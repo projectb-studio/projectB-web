@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { getProductBySlug } from "@/lib/data/products";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { ProductInfo } from "@/components/product/ProductInfo";
+import { ProductReviews } from "@/components/product/ProductReviews";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -38,8 +39,8 @@ export default async function ProductDetailPage({
           Home
         </Link>
         <ChevronRight size={10} strokeWidth={1.5} />
-        <Link href="/shop" className="hover:text-pb-jet-black transition-colors">
-          Shop
+        <Link href="/category" className="hover:text-pb-jet-black transition-colors">
+          Category
         </Link>
         <ChevronRight size={10} strokeWidth={1.5} />
         <span className="text-pb-charcoal truncate max-w-[200px]">{product.name}</span>
@@ -56,6 +57,12 @@ export default async function ProductDetailPage({
         {/* Right: Product info */}
         <ProductInfo product={product} />
       </div>
+
+      {/* Divider */}
+      <div className="h-px bg-pb-light-gray/40 mt-12" />
+
+      {/* Reviews */}
+      <ProductReviews productSlug={slug} />
     </section>
   );
 }
