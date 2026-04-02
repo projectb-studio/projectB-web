@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Package, Heart, UserIcon, Gift } from "lucide-react";
@@ -34,7 +34,70 @@ function EmptyState({ message, cta }: { message: string; cta?: { label: string; 
 }
 
 function OrdersTab() {
-  return <EmptyState message="주문 내역이 없습니다." cta={{ label: "Shop Now", href: "/shop" }} />;
+  const [orders, setOrders] = useState<Array<{
+    id: string;
+    status: string;
+    total_amount: number;
+    order_name: string;
+    created_at: string;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const res = await fetch("/api/orders");
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data.orders ?? []);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return <p className="text-sm text-pb-gray py-12 text-center">불러오는 중...</p>;
+  }
+
+  if (orders.length === 0) {
+    return <EmptyState message="주문 내역이 없습니다." cta={{ label: "쇼핑하러 가기", href: "/shop" }} />;
+  }
+
+  const statusLabels: Record<string, string> = {
+    pending: "결제 대기",
+    paid: "결제 완료",
+    shipped: "배송 중",
+    delivered: "배송 완료",
+    cancelled: "주문 취소",
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-pb-gray mb-4">{orders.length}건의 주문</p>
+      {orders.map((order) => (
+        <div key={order.id} className="border border-pb-light-gray p-5">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <p className="text-xs text-pb-silver tracking-wider">{order.id}</p>
+              <p className="text-sm font-medium mt-1">{order.order_name}</p>
+            </div>
+            <span className="text-xs text-pb-gray tracking-wider uppercase">
+              {statusLabels[order.status] ?? order.status}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-xs text-pb-silver">
+            <span>{new Date(order.created_at).toLocaleDateString("ko-KR")}</span>
+            <span className="font-medium text-pb-jet-black">
+              {new Intl.NumberFormat("ko-KR").format(order.total_amount)}원
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function WishlistTab() {
