@@ -2,15 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
-const SOCIAL_PROVIDERS = [
+// Supabase Provider type for OAuth — Naver requires custom OIDC setup
+type SocialProviderId = "kakao" | "google" | "custom:naver";
+
+const SOCIAL_PROVIDERS: ReadonlyArray<{
+  id: SocialProviderId;
+  label: string;
+  bg: string;
+  text: string;
+}> = [
   { id: "kakao", label: "카카오로 시작하기", bg: "#FEE500", text: "#191919" },
-  { id: "naver", label: "네이버로 시작하기", bg: "#03C75A", text: "#FFFFFF" },
+  { id: "custom:naver", label: "네이버로 시작하기", bg: "#03C75A", text: "#FFFFFF" },
   { id: "google", label: "Google로 시작하기", bg: "#FFFFFF", text: "#191919" },
-] as const;
+];
 
 type Tab = "login" | "signup";
 
@@ -49,7 +57,22 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next") ?? "/mypage";
   const supabase = createClient();
+
+  async function handleSocialLogin(provider: SocialProviderId) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback?next=${nextPath}`,
+      },
+    });
+
+    if (error) {
+      setError("소셜 로그인에 실패했습니다. 다시 시도해주세요.");
+    }
+  }
 
   async function handleEmailAuth(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -102,7 +125,7 @@ export default function AuthPage() {
       return;
     }
 
-    router.push("/mypage");
+    router.push(nextPath);
     router.refresh();
   }
 
@@ -118,9 +141,7 @@ export default function AuthPage() {
           <button
             key={provider.id}
             type="button"
-            onClick={() => {
-              // TODO: Supabase Auth social login
-            }}
+            onClick={() => handleSocialLogin(provider.id)}
             className="w-full py-3 px-4 text-sm font-medium transition-opacity hover:opacity-90"
             style={{
               backgroundColor: provider.bg,
