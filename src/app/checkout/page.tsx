@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
 import { useCartStore } from "@/stores/cart";
 import { formatPrice } from "@/lib/utils";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/site";
 import { ShoppingBag } from "lucide-react";
+
+const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
 const PAYMENT_METHODS = [
   { id: "card", label: "신용/체크카드" },
@@ -20,12 +22,14 @@ const PAYMENT_METHODS = [
 function InputField({
   label,
   id,
+  name,
   type = "text",
   placeholder,
   required = true,
 }: {
   label: string;
   id: string;
+  name: string;
   type?: string;
   placeholder?: string;
   required?: boolean;
@@ -37,6 +41,7 @@ function InputField({
       </label>
       <input
         id={id}
+        name={name}
         type={type}
         placeholder={placeholder}
         required={required}
@@ -47,11 +52,10 @@ function InputField({
 }
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
-  const clearCart = useCartStore((s) => s.clearCart);
   const [selectedPayment, setSelectedPayment] = useState("card");
+  const [orderId] = useState(() => `PB-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
 
   const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 3000;
   const total = subtotal + shippingFee;
@@ -67,18 +71,63 @@ export default function CheckoutPage() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handlePayment(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: Tosspayments integration
-    clearCart();
-    router.push("/order-complete");
+
+    const formData = new FormData(e.currentTarget);
+    const customerName = formData.get("name") as string;
+    const customerEmail = formData.get("email") as string;
+    const customerPhone = formData.get("phone") as string;
+
+    if (!customerName || !customerEmail || !customerPhone) {
+      alert("배송 정보를 모두 입력해주세요.");
+      return;
+    }
+
+    // Store shipping info in sessionStorage for success page
+    const shippingInfo = {
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      address: formData.get("address") as string,
+      addressDetail: formData.get("addressDetail") as string,
+      postalCode: formData.get("postalCode") as string,
+      memo: formData.get("memo") as string,
+    };
+    sessionStorage.setItem("pb-shipping", JSON.stringify(shippingInfo));
+    sessionStorage.setItem("pb-order-id", orderId);
+
+    const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
+    const payment = tossPayments.payment({ customerKey: ANONYMOUS });
+
+    const orderName =
+      items.length === 1
+        ? items[0].product.name
+        : `${items[0].product.name} 외 ${items.length - 1}건`;
+
+    const baseRequest = {
+      amount: { currency: "KRW", value: total },
+      orderId,
+      orderName,
+      customerName,
+      customerEmail,
+      customerMobilePhone: customerPhone.replace(/-/g, ""),
+      successUrl: `${window.location.origin}/checkout/success`,
+      failUrl: `${window.location.origin}/checkout/fail`,
+    } as const;
+
+    if (selectedPayment === "transfer") {
+      await payment.requestPayment({ method: "TRANSFER", ...baseRequest });
+    } else {
+      await payment.requestPayment({ method: "CARD", ...baseRequest });
+    }
   }
 
   return (
     <section className="max-w-content mx-auto px-6 lg:px-12 py-12 lg:py-20">
       <h1 className="heading-display text-sm text-center tracking-wide mb-10">Checkout</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handlePayment}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left: Shipping + Payment */}
           <div className="lg:col-span-2 space-y-10">
@@ -88,16 +137,16 @@ export default function CheckoutPage() {
                 Shipping Information
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <InputField label="Name" id="name" placeholder="이름" />
-                <InputField label="Phone" id="phone" type="tel" placeholder="010-0000-0000" />
+                <InputField label="Name" id="name" name="name" placeholder="이름" />
+                <InputField label="Phone" id="phone" name="phone" type="tel" placeholder="010-0000-0000" />
                 <div className="sm:col-span-2">
-                  <InputField label="Address" id="address" placeholder="주소" />
+                  <InputField label="Address" id="address" name="address" placeholder="주소" />
                 </div>
                 <div className="sm:col-span-2">
-                  <InputField label="Detail Address" id="addressDetail" placeholder="상세주소" required={false} />
+                  <InputField label="Detail Address" id="addressDetail" name="addressDetail" placeholder="상세주소" required={false} />
                 </div>
-                <InputField label="Postal Code" id="postal" placeholder="우편번호" />
-                <InputField label="Email" id="email" type="email" placeholder="email@example.com" />
+                <InputField label="Postal Code" id="postal" name="postalCode" placeholder="우편번호" />
+                <InputField label="Email" id="email" name="email" type="email" placeholder="email@example.com" />
               </div>
               <div className="mt-4">
                 <label htmlFor="memo" className="block text-xs text-pb-gray uppercase tracking-industrial mb-1.5">
@@ -105,6 +154,7 @@ export default function CheckoutPage() {
                 </label>
                 <textarea
                   id="memo"
+                  name="memo"
                   rows={2}
                   placeholder="배송 메모 (선택)"
                   className="w-full border border-pb-light-gray px-3 py-2.5 text-sm focus:border-pb-jet-black focus:outline-none transition-colors resize-none"
