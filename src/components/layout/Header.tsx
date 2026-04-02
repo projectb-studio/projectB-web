@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import { Menu, X, Search, ShoppingBag, User } from "lucide-react";
 import { NAV_ITEMS, SITE_CONFIG } from "@/constants/site";
 import { useCartStore } from "@/stores/cart";
+import { SearchOverlay } from "@/components/layout/SearchOverlay";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const totalItems = useCartStore((s) => s.totalItems());
 
@@ -57,7 +59,11 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            <button aria-label="Search" className="p-2">
+            <button
+              aria-label="Search"
+              className="p-2"
+              onClick={() => setIsSearchOpen(true)}
+            >
               <Search size={18} strokeWidth={1.5} />
             </button>
             <Link href="/auth" aria-label="Account" className="p-2">
@@ -96,6 +102,10 @@ export function Header() {
           </div>
         </nav>
       )}
+      <SearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </header>
   );
 }

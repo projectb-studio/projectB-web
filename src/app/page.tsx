@@ -2,6 +2,7 @@ import { getNewProducts, getBestSellers } from "@/lib/data/products";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProductGridSection } from "@/components/home/ProductGridSection";
 import { BrandStoreCta } from "@/components/home/BrandStoreCta";
+import { Newsletter } from "@/components/home/Newsletter";
 import { SECTION_TITLES } from "@/constants/home";
 
 export default async function HomePage() {
@@ -23,6 +24,7 @@ export default async function HomePage() {
         viewAllHref="/category"
         variant="horizontal"
       />
+      <Newsletter />
     </>
   );
 }

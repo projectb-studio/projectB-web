@@ -7,6 +7,7 @@ import { Accordion } from "./Accordion";
 import { useCartStore } from "@/stores/cart";
 import { ChevronDown } from "lucide-react";
 import { WishlistButton } from "@/components/common/WishlistButton";
+import { ShareButtons } from "./ShareButtons";
 import type { Product } from "@/types/database";
 
 interface ProductInfoProps {
@@ -14,9 +15,15 @@ interface ProductInfoProps {
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
-  const { name, price, salePrice, tag, badge, description, details, shipping, care } = product;
+  const { name, price, salePrice, tag, badge, description, details, shipping, care, options } = product;
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<string | null>(
+    options?.colors?.[0]?.value ?? null
+  );
+  const [selectedSize, setSelectedSize] = useState<string | null>(
+    options?.sizes?.[0] ?? null
+  );
   const addItem = useCartStore((s) => s.addItem);
 
   const badgeClass =
@@ -73,6 +80,61 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Divider */}
       <div className="h-px bg-pb-light-gray/40" />
 
+      {/* Product options: Color + Size */}
+      {options?.colors && options.colors.length > 0 && (
+        <div>
+          <p className="text-xs text-pb-gray uppercase tracking-industrial mb-2">
+            Color
+            {selectedColor && (
+              <span className="ml-2 normal-case tracking-normal text-[var(--pb-charcoal)]">
+                — {options.colors.find((c) => c.value === selectedColor)?.name}
+              </span>
+            )}
+          </p>
+          <div className="flex gap-2">
+            {options.colors.map((color) => (
+              <button
+                key={color.value}
+                type="button"
+                title={color.name}
+                onClick={() => setSelectedColor(color.value)}
+                className={cn(
+                  "w-6 h-6 transition-all",
+                  "border",
+                  selectedColor === color.value
+                    ? "border-[2px] border-[var(--pb-jet-black)]"
+                    : "border-[var(--pb-light-gray)] hover:border-[var(--pb-gray)]"
+                )}
+                style={{ backgroundColor: color.value }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {options?.sizes && options.sizes.length > 0 && (
+        <div>
+          <p className="text-xs text-pb-gray uppercase tracking-industrial mb-2">Size</p>
+          <div className="flex gap-2">
+            {options.sizes.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSize(size)}
+                className={cn(
+                  "px-4 py-2 text-xs uppercase tracking-industrial transition-colors border",
+                  selectedSize === size
+                    ? "bg-[var(--pb-jet-black)] text-white border-[var(--pb-jet-black)]"
+                    : "bg-transparent text-[var(--pb-charcoal)] border-[var(--pb-light-gray)] hover:border-[var(--pb-jet-black)]"
+                )}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Quantity + Add to cart */}
       <div className="space-y-4">
         <div>
@@ -109,6 +171,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
           리뷰 보기
           <ChevronDown size={14} strokeWidth={1.5} />
         </button>
+        {/* SNS share */}
+        <ShareButtons title={name} />
       </div>
 
       {/* Accordion */}

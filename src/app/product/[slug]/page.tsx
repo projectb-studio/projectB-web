@@ -6,6 +6,8 @@ import { getProductBySlug } from "@/lib/data/products";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { ProductInfo } from "@/components/product/ProductInfo";
 import { ProductReviews } from "@/components/product/ProductReviews";
+import { TrackView } from "@/components/product/TrackView";
+import { RecentlyViewed } from "@/components/common/RecentlyViewed";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -33,6 +35,9 @@ export default async function ProductDetailPage({
 
   return (
     <section className="max-w-content mx-auto px-6 lg:px-12 py-8 lg:py-16">
+      {/* Track recently viewed */}
+      <TrackView product={product} />
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-[11px] text-pb-silver mb-8">
         <Link href="/" className="hover:text-pb-jet-black transition-colors">
@@ -63,6 +68,9 @@ export default async function ProductDetailPage({
 
       {/* Reviews */}
       <ProductReviews productSlug={slug} />
+
+      {/* Recently Viewed */}
+      <RecentlyViewed />
     </section>
   );
 }

@@ -103,6 +103,16 @@ export type Database = {
 export type ProductTag = "handmade" | "fabric" | "metal" | "wood" | "stone" | "glass";
 export type ProductBadge = "NEW" | "BEST" | "SALE" | "HANDMADE" | null;
 
+export interface ProductColorOption {
+  name: string;
+  value: string; // hex color code
+}
+
+export interface ProductOptions {
+  colors?: ProductColorOption[];
+  sizes?: string[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -118,4 +128,5 @@ export interface Product {
   shipping?: string;
   care?: string;
   material?: string;
+  options?: ProductOptions;
 }

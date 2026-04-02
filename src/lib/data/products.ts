@@ -10,6 +10,12 @@ const DUMMY_PRODUCTS: Product[] = [
     badge: null,
     slug: "ceramic-vase-matte-black",
     imageUrl: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&h=600&fit=crop&crop=center",
+    options: {
+      colors: [
+        { name: "Matte Black", value: "#1A1A1A" },
+        { name: "Ivory", value: "#F5F0E8" },
+      ],
+    },
   },
   {
     id: "2",
@@ -19,6 +25,13 @@ const DUMMY_PRODUCTS: Product[] = [
     badge: "NEW",
     slug: "linen-table-runner-ivory",
     imageUrl: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600&h=600&fit=crop&crop=center",
+    options: {
+      colors: [
+        { name: "Ivory", value: "#F5F0E8" },
+        { name: "Natural", value: "#D4C5A9" },
+      ],
+      sizes: ["S", "L"],
+    },
   },
   {
     id: "3",
@@ -37,6 +50,12 @@ const DUMMY_PRODUCTS: Product[] = [
     badge: "BEST",
     slug: "wool-felt-coaster-4p",
     imageUrl: "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=600&h=600&fit=crop&crop=center",
+    options: {
+      colors: [
+        { name: "Gray", value: "#8B8B8B" },
+        { name: "Beige", value: "#D9C9AE" },
+      ],
+    },
   },
   {
     id: "5",
@@ -188,6 +207,16 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     ...DUMMY_DETAIL,
     material: product.tag,
   };
+}
+
+// Search products by name (case-insensitive, Korean-friendly)
+export async function searchProducts(query: string): Promise<Product[]> {
+  const trimmed = query.trim().toLowerCase();
+  if (!trimmed) return [];
+
+  return DUMMY_PRODUCTS.filter((p) =>
+    p.name.toLowerCase().includes(trimmed)
+  ).slice(0, 20);
 }
 
 // Returns filtered + paginated products for the Shop page
