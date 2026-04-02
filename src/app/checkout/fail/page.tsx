@@ -1,9 +1,24 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function CheckoutFailPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center">
+          <p className="text-pb-gray text-sm">Loading...</p>
+        </main>
+      }
+    >
+      <FailContent />
+    </Suspense>
+  );
+}
+
+function FailContent() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
   const message = searchParams.get("message");

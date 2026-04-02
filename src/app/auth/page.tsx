@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,14 @@ function InputField({
 }
 
 export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-pb-gray text-sm">Loading...</p></div>}>
+      <AuthContent />
+    </Suspense>
+  );
+}
+
+function AuthContent() {
   const [tab, setTab] = useState<Tab>("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
