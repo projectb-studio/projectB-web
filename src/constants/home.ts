@@ -1,7 +1,19 @@
+export interface HeroSlide {
+  id: number;
+  src: string;
+  alt: string;
+}
+
+export const HERO_SLIDES: HeroSlide[] = [
+  { id: 1, src: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1920&q=80", alt: "Handcrafted interior accessories" },
+  { id: 2, src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&q=80", alt: "Artisan ceramics collection" },
+  { id: 3, src: "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=1920&q=80", alt: "Minimal lifestyle objects" },
+  { id: 4, src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80", alt: "Handmade craft workspace" },
+];
+
 export const HERO_CONTENT = {
   heading: "PROJECT B",
   subtext: "Curated accessories for mindful living",
-  image: "/images/hero-home.jpg",
   primaryCta: { label: "SHOP ONLINE", href: "/shop" },
   secondaryCta: { label: "VISIT STORE", href: "/store-location" },
 } as const;
