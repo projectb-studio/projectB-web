@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { searchProducts } from "@/lib/data/products";
 import type { Product } from "@/types/database";
 
 interface SearchOverlayProps {
@@ -71,8 +70,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     }
 
     debounceRef.current = setTimeout(async () => {
-      const found = await searchProducts(value);
-      setResults(found);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(value)}`);
+      const json = (await res.json()) as { products: Product[] };
+      setResults(json.products);
       setHasSearched(true);
     }, 300);
   }, []);
