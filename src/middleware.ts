@@ -1,19 +1,27 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  const response = await updateSession(request);
+
+  // Protect /admin routes: redirect to /auth if no session cookie
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    const hasSession = request.cookies.getAll().some(
+      (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token")
+    );
+
+    if (!hasSession) {
+      const loginUrl = new URL("/auth", request.url);
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico (favicon)
-     * - public folder assets
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
