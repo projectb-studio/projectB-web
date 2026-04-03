@@ -21,10 +21,11 @@ export function Footer() {
                 href={STORE_INFO.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--pb-silver)] hover:text-[var(--pb-snow)] transition-colors"
+                className="flex items-center gap-1.5 text-[var(--pb-silver)] hover:text-[var(--pb-snow)] transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram size={20} />
+                <span className="text-xs tracking-wide">Instagram</span>
               </a>
             </div>
           </div>

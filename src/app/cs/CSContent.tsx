@@ -68,14 +68,41 @@ function FaqAccordion({ items }: { items: FaqItem[] }) {
 // --- Inquiry Form (reused inside Q&A tab) ---
 
 function InquiryForm({ onClose }: { onClose?: () => void }) {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("submitting");
+
+    // TODO: Replace with Supabase pb_cs_inquiries insert
+    setTimeout(() => {
+      setStatus("success");
+    }, 500);
+  };
+
+  if (status === "success") {
+    return (
+      <div className="space-y-4 max-w-lg">
+        <div className="py-8 text-center">
+          <p className="text-sm font-medium text-[var(--accent-success)] mb-2">문의가 등록되었습니다.</p>
+          <p className="text-xs text-pb-gray mb-6">답변은 1~2영업일 내에 등록됩니다.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setStatus("idle");
+              onClose?.();
+            }}
+            className="btn-secondary text-xs px-4 py-2"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        // TODO: Submit to Supabase pb_cs_inquiries
-      }}
-      className="space-y-4 max-w-lg"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-xs font-heading font-semibold uppercase tracking-industrial">
           문의 작성
@@ -96,6 +123,7 @@ function InquiryForm({ onClose }: { onClose?: () => void }) {
         </label>
         <select
           id="inquiry-type"
+          name="type"
           required
           className="w-full border border-pb-light-gray px-3 py-2.5 text-sm focus:border-pb-jet-black focus:outline-none transition-colors bg-white"
         >
@@ -112,6 +140,7 @@ function InquiryForm({ onClose }: { onClose?: () => void }) {
         </label>
         <input
           id="inquiry-title"
+          name="title"
           type="text"
           required
           placeholder="문의 제목을 입력해주세요"
@@ -124,13 +153,16 @@ function InquiryForm({ onClose }: { onClose?: () => void }) {
         </label>
         <textarea
           id="inquiry-content"
+          name="content"
           rows={6}
           required
           placeholder="문의 내용을 상세히 작성해주세요"
           className="w-full border border-pb-light-gray px-3 py-2.5 text-sm focus:border-pb-jet-black focus:outline-none transition-colors resize-none"
         />
       </div>
-      <button type="submit" className="btn-primary">문의 등록</button>
+      <button type="submit" disabled={status === "submitting"} className="btn-primary disabled:opacity-50">
+        {status === "submitting" ? "등록 중..." : "문의 등록"}
+      </button>
     </form>
   );
 }
@@ -361,25 +393,50 @@ function EtcInquiryTab() {
 // --- Wholesale Tab (도매/제휴 문의) ---
 
 function WholesaleTab() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("submitting");
+
+    // TODO: Replace with Supabase pb_cs_inquiries insert (type: wholesale)
+    setTimeout(() => {
+      setStatus("success");
+    }, 500);
+  };
+
+  if (status === "success") {
+    return (
+      <div className="space-y-10 max-w-lg">
+        <div className="py-8 text-center">
+          <p className="text-sm font-medium text-[var(--accent-success)] mb-2">도매/제휴 문의가 등록되었습니다.</p>
+          <p className="text-xs text-pb-gray mb-6">담당자 확인 후 연락드리겠습니다. (1~3영업일)</p>
+          <button
+            type="button"
+            onClick={() => setStatus("idle")}
+            className="btn-secondary text-xs px-4 py-2"
+          >
+            새 문의 작성
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-10 max-w-lg">
       <p className="text-sm text-pb-charcoal leading-relaxed">
         대량 구매, 도매, 공간 제휴 등 비즈니스 문의를 남겨주세요.
       </p>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          // TODO: Submit to Supabase
-        }}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="ws-company" className="block text-xs text-pb-gray uppercase tracking-industrial mb-1.5">
             회사/단체명
           </label>
           <input
             id="ws-company"
+            name="company"
             type="text"
             required
             placeholder="회사 또는 단체명을 입력해주세요"
@@ -392,6 +449,7 @@ function WholesaleTab() {
           </label>
           <input
             id="ws-name"
+            name="name"
             type="text"
             required
             placeholder="담당자 성함을 입력해주세요"
@@ -404,6 +462,7 @@ function WholesaleTab() {
           </label>
           <input
             id="ws-phone"
+            name="phone"
             type="tel"
             required
             placeholder="010-0000-0000"
@@ -416,6 +475,7 @@ function WholesaleTab() {
           </label>
           <input
             id="ws-email"
+            name="email"
             type="email"
             required
             placeholder="email@example.com"
@@ -428,13 +488,16 @@ function WholesaleTab() {
           </label>
           <textarea
             id="ws-content"
+            name="content"
             rows={6}
             required
             placeholder="문의 내용을 상세히 작성해주세요"
             className="w-full border border-pb-light-gray px-3 py-2.5 text-sm focus:border-pb-jet-black focus:outline-none transition-colors resize-none"
           />
         </div>
-        <button type="submit" className="btn-primary">문의 등록</button>
+        <button type="submit" disabled={status === "submitting"} className="btn-primary disabled:opacity-50">
+          {status === "submitting" ? "등록 중..." : "문의 등록"}
+        </button>
       </form>
 
       <div className="h-px bg-pb-light-gray/40" />

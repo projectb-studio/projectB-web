@@ -1,55 +1,64 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY!;
-const TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
+const PORTONE_API_SECRET = process.env.PORTONE_API_SECRET!;
+const PORTONE_API_URL = "https://api.portone.io";
 
 export async function POST(request: Request) {
-  const { paymentKey, orderId, amount } = await request.json();
+  const { paymentId } = await request.json();
 
-  if (!paymentKey || !orderId || !amount) {
+  if (!paymentId) {
     return NextResponse.json(
-      { message: "필수 파라미터가 누락되었습니다." },
+      { message: "paymentId가 누락되었습니다." },
       { status: 400 }
     );
   }
 
-  // 1. Confirm payment with Tosspayments
-  const confirmRes = await fetch(TOSS_CONFIRM_URL, {
-    method: "POST",
+  // 1. Verify payment with PortOne V2 API
+  const verifyRes = await fetch(`${PORTONE_API_URL}/payments/${encodeURIComponent(paymentId)}`, {
+    method: "GET",
     headers: {
-      Authorization: `Basic ${Buffer.from(`${TOSS_SECRET_KEY}:`).toString("base64")}`,
+      Authorization: `PortOne ${PORTONE_API_SECRET}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ paymentKey, orderId, amount }),
   });
 
-  if (!confirmRes.ok) {
-    const errorData = await confirmRes.json();
+  if (!verifyRes.ok) {
+    const errorData = await verifyRes.json();
     return NextResponse.json(
-      { message: errorData.message ?? "결제 승인 실패" },
-      { status: confirmRes.status }
+      { message: errorData.message ?? "결제 조회 실패" },
+      { status: verifyRes.status }
     );
   }
 
-  const paymentData = await confirmRes.json();
+  const paymentData = await verifyRes.json();
 
-  // 2. Save order to Supabase
+  // 2. Check payment status
+  if (paymentData.status !== "PAID") {
+    return NextResponse.json(
+      { message: `결제가 완료되지 않았습니다. (상태: ${paymentData.status})` },
+      { status: 400 }
+    );
+  }
+
+  // 3. Save order to Supabase
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const totalAmount = paymentData.amount?.total ?? 0;
+
   // TODO: Replace type assertion after running `supabase gen types typescript`
   const { error: orderError } = await (supabase.from("pb_orders") as ReturnType<typeof supabase.from>).insert({
-    id: orderId,
+    id: paymentId,
     user_id: user?.id ?? null,
     status: "paid",
-    total_amount: amount,
+    total_amount: totalAmount,
     shipping_fee: 0,
     shipping_address: {},
-    payment_key: paymentKey,
-    payment_method: paymentData.method ?? null,
+    payment_id: paymentId,
+    payment_method: paymentData.method?.type ?? null,
     order_name: paymentData.orderName ?? "",
   } as Record<string, unknown>);
 
@@ -64,5 +73,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ success: true, orderId });
+  return NextResponse.json({ success: true, paymentId, amount: totalAmount });
 }

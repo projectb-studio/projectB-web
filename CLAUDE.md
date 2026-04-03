@@ -36,7 +36,7 @@ Frontend:  Next.js 14+ / TypeScript (strict) / Tailwind CSS / App Router
 Backend:   Supabase (PostgreSQL + Auth + Edge Functions)
 Images:    Cloudflare R2
 Deploy:    Vercel
-Payment:   토스페이먼츠 (Tosspayments)
+Payment:   포트원 (PortOne V2)
 ```
 
 ### Package Dependencies
@@ -66,8 +66,9 @@ R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
 R2_BUCKET_NAME=projectb-images
 NEXT_PUBLIC_R2_PUBLIC_URL=
-NEXT_PUBLIC_TOSS_CLIENT_KEY=
-TOSS_SECRET_KEY=
+NEXT_PUBLIC_PORTONE_STORE_ID=
+NEXT_PUBLIC_PORTONE_CHANNEL_KEY=
+PORTONE_API_SECRET=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
@@ -80,7 +81,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
   → [Cloudflare CDN] → [Vercel (Next.js Frontend)]
   → [Cloudflare R2 (Images)]
   → [Supabase (DB + Auth + API)]
-    → [Tosspayments (PG)]
+    → [PortOne (PG)]
     → [Kakao Alimtalk]
 
 [Admin Dashboard] → [Vercel] → [Supabase]
@@ -210,7 +211,7 @@ src/
 │   ├── reviews/page.tsx      # Photo reviews
 │   ├── cs/page.tsx           # Customer service (FAQ/1:1/Return)
 │   ├── cart/page.tsx         # Shopping cart
-│   ├── checkout/page.tsx     # Checkout (Tosspayments)
+│   ├── checkout/page.tsx     # Checkout (PortOne)
 │   ├── order-complete/page.tsx # Order confirmation
 │   ├── mypage/page.tsx       # My page
 │   ├── auth/page.tsx         # Login/Signup
@@ -300,7 +301,7 @@ const PRODUCTS = [
 ### Payment
 - 카드 결제, 무통장 입금, 카카오페이, 네이버페이, 토스페이
 - 포인트/적립금 결제, 해외 결제(페이팔), 휴대폰 결제
-- PG사: **토스페이먼츠**
+- PG사: **포트원 (PortOne V2)**
 
 ### Member
 - 회원가입 (이메일), 카카오/네이버/구글/애플 로그인
@@ -399,7 +400,7 @@ Social login providers to configure:
 
 ### P2 — Next Week
 10. Cart + Checkout 플로우
-11. 토스페이먼츠 결제 연동
+11. 포트원(PortOne) 결제 연동
 12. Auth (소셜 로그인)
 13. My Page (주문내역, 위시리스트)
 

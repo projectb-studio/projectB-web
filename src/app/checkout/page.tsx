@@ -3,21 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
+import * as PortOne from "@portone/browser-sdk/v2";
 import { useCartStore } from "@/stores/cart";
 import { formatPrice } from "@/lib/utils";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/site";
 import { ShoppingBag } from "lucide-react";
 
-const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
+const STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID!;
+const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!;
 
 const PAYMENT_METHODS = [
-  { id: "card", label: "신용/체크카드" },
-  { id: "transfer", label: "무통장 입금" },
-  { id: "kakaopay", label: "카카오페이" },
-  { id: "naverpay", label: "네이버페이" },
-  { id: "tosspay", label: "토스페이" },
+  { id: "CARD", label: "신용/체크카드" },
+  { id: "TRANSFER", label: "계좌이체" },
+  { id: "VIRTUAL_ACCOUNT", label: "가상계좌" },
+  { id: "MOBILE", label: "휴대폰 결제" },
+  { id: "EASY_PAY", label: "간편결제" },
 ] as const;
+
+type PayMethod = (typeof PAYMENT_METHODS)[number]["id"];
 
 function InputField({
   label,
@@ -54,8 +57,8 @@ function InputField({
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
-  const [selectedPayment, setSelectedPayment] = useState("card");
-  const [orderId] = useState(() => `PB-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
+  const [selectedPayment, setSelectedPayment] = useState<PayMethod>("CARD");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 3000;
   const total = subtotal + shippingFee;
@@ -73,6 +76,8 @@ export default function CheckoutPage() {
 
   async function handlePayment(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (isProcessing) return;
+    setIsProcessing(true);
 
     const formData = new FormData(e.currentTarget);
     const customerName = formData.get("name") as string;
@@ -81,6 +86,7 @@ export default function CheckoutPage() {
 
     if (!customerName || !customerEmail || !customerPhone) {
       alert("배송 정보를 모두 입력해주세요.");
+      setIsProcessing(false);
       return;
     }
 
@@ -95,31 +101,45 @@ export default function CheckoutPage() {
       memo: formData.get("memo") as string,
     };
     sessionStorage.setItem("pb-shipping", JSON.stringify(shippingInfo));
-    sessionStorage.setItem("pb-order-id", orderId);
 
-    const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
-    const payment = tossPayments.payment({ customerKey: ANONYMOUS });
+    const paymentId = `PB-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    sessionStorage.setItem("pb-order-id", paymentId);
 
     const orderName =
       items.length === 1
         ? items[0].product.name
         : `${items[0].product.name} 외 ${items.length - 1}건`;
 
-    const baseRequest = {
-      amount: { currency: "KRW", value: total },
-      orderId,
-      orderName,
-      customerName,
-      customerEmail,
-      customerMobilePhone: customerPhone.replace(/-/g, ""),
-      successUrl: `${window.location.origin}/checkout/success`,
-      failUrl: `${window.location.origin}/checkout/fail`,
-    } as const;
+    try {
+      const response = await PortOne.requestPayment({
+        storeId: STORE_ID,
+        channelKey: CHANNEL_KEY,
+        paymentId,
+        orderName,
+        totalAmount: total,
+        currency: "CURRENCY_KRW",
+        payMethod: selectedPayment,
+        customer: {
+          fullName: customerName,
+          email: customerEmail,
+          phoneNumber: customerPhone.replace(/-/g, ""),
+        },
+        redirectUrl: `${window.location.origin}/checkout/success`,
+      });
 
-    if (selectedPayment === "transfer") {
-      await payment.requestPayment({ method: "TRANSFER", ...baseRequest });
-    } else {
-      await payment.requestPayment({ method: "CARD", ...baseRequest });
+      if (!response || response.code != null) {
+        // Payment failed or cancelled
+        const message = response?.message ?? "결제가 취소되었습니다.";
+        alert(message);
+        setIsProcessing(false);
+        return;
+      }
+
+      // Payment succeeded — verify on server
+      window.location.href = `/checkout/success?paymentId=${paymentId}`;
+    } catch {
+      alert("결제 요청 중 오류가 발생했습니다.");
+      setIsProcessing(false);
     }
   }
 
@@ -184,7 +204,7 @@ export default function CheckoutPage() {
                 ))}
               </div>
               <p className="text-[10px] text-pb-silver mt-3">
-                토스페이먼츠 연동 후 실결제가 진행됩니다.
+                포트원(PortOne) 결제 시스템을 통해 안전하게 결제됩니다.
               </p>
             </div>
           </div>
@@ -240,8 +260,8 @@ export default function CheckoutPage() {
                 <span>{formatPrice(total)}</span>
               </div>
 
-              <button type="submit" className="btn-primary w-full">
-                Pay {formatPrice(total)}
+              <button type="submit" disabled={isProcessing} className="btn-primary w-full disabled:opacity-50">
+                {isProcessing ? "처리 중..." : `Pay ${formatPrice(total)}`}
               </button>
             </div>
           </div>

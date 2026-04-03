@@ -25,19 +25,17 @@ function SuccessContent() {
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const paymentKey = searchParams.get("paymentKey");
-  const orderId = searchParams.get("orderId");
-  const amount = searchParams.get("amount");
+  const paymentId = searchParams.get("paymentId");
 
   useEffect(() => {
-    if (!paymentKey || !orderId || !amount) return;
+    if (!paymentId) return;
 
     async function confirmPayment() {
       try {
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
+          body: JSON.stringify({ paymentId }),
         });
 
         if (!res.ok) {
@@ -54,7 +52,7 @@ function SuccessContent() {
     }
 
     confirmPayment();
-  }, [paymentKey, orderId, amount, clearCart]);
+  }, [paymentId, clearCart]);
 
   if (error) {
     return (
@@ -80,7 +78,7 @@ function SuccessContent() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
       <div className="w-12 h-px bg-pb-light-gray mb-8" />
       <h1 className="heading-section text-2xl lg:text-3xl mb-4">주문 완료</h1>
-      <p className="text-pb-gray text-sm mb-2">주문번호: {orderId}</p>
+      <p className="text-pb-gray text-sm mb-2">주문번호: {paymentId}</p>
       <p className="text-pb-gray text-sm mb-10">
         주문이 성공적으로 완료되었습니다.
       </p>
