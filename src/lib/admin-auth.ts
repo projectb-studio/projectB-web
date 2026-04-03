@@ -11,13 +11,14 @@ export async function getAdminUser(): Promise<DbUserProfile | null> {
 
   if (!user) return null;
 
-  const { data: profile } = await supabase
-    .from("pb_users_profile")
+  const { data: profile } = await (supabase
+    .from("pb_users_profile") as ReturnType<typeof supabase.from>)
     .select("*")
     .eq("user_id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") return null;
+  const row = profile as unknown as DbUserProfile | null;
+  if (!row || row.role !== "admin") return null;
 
-  return profile as DbUserProfile;
+  return row;
 }
