@@ -3,8 +3,17 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Review } from "@/lib/data/reviews";
-import { getReviews } from "@/lib/data/reviews";
+
+interface Review {
+  id: string;
+  productName: string;
+  productSlug: string;
+  author: string;
+  rating: number;
+  content: string;
+  imageUrl: string | null;
+  date: string;
+}
 
 interface ProductReviewsProps {
   productSlug: string;
@@ -34,10 +43,12 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getReviews().then((all) => {
-      setReviews(all.filter((r) => r.productSlug === productSlug));
-      setLoading(false);
-    });
+    fetch(`/api/reviews?product=${encodeURIComponent(productSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setReviews(data);
+        setLoading(false);
+      });
   }, [productSlug]);
 
   if (loading) {
