@@ -1,70 +1,82 @@
+import { createClient } from "@/lib/supabase/server";
+
 export interface MagazinePost {
   id: string;
   title: string;
   excerpt: string;
   slug: string;
   imageUrl: string;
+  content: string | null;
   category: string;
+  categoryId: string | null;
   date: string;
 }
 
-const DUMMY_POSTS: MagazinePost[] = [
-  {
-    id: "1",
-    title: "The art of handmade ceramics",
-    excerpt: "도자기 한 점이 만들어지기까지, 장인의 손끝에서 일어나는 일들을 소개합니다.",
-    slug: "art-of-handmade-ceramics",
-    imageUrl: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&h=400&fit=crop&crop=center",
-    category: "Craft",
-    date: "2026-03-28",
-  },
-  {
-    id: "2",
-    title: "Living with natural materials",
-    excerpt: "목재, 돌, 유리 — 자연 소재가 가져다주는 공간의 변화에 대하여.",
-    slug: "living-with-natural-materials",
-    imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop&crop=center",
-    category: "Lifestyle",
-    date: "2026-03-20",
-  },
-  {
-    id: "3",
-    title: "How to care for brass items",
-    excerpt: "황동 제품을 오래도록 아름답게 유지하는 관리법을 알려드립니다.",
-    slug: "how-to-care-for-brass",
-    imageUrl: "https://images.unsplash.com/photo-1602523961358-f9f03dd557db?w=600&h=400&fit=crop&crop=center",
-    category: "Care Guide",
-    date: "2026-03-15",
-  },
-  {
-    id: "4",
-    title: "Spring table styling ideas",
-    excerpt: "봄맞이 테이블 세팅, PROJECT B 소품으로 완성하는 따뜻한 식탁.",
-    slug: "spring-table-styling",
-    imageUrl: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600&h=400&fit=crop&crop=center",
-    category: "Styling",
-    date: "2026-03-10",
-  },
-  {
-    id: "5",
-    title: "Behind the scenes: Our workshop",
-    excerpt: "PROJECT B 작업실의 하루를 공개합니다. 어떤 과정을 거쳐 제품이 탄생하는지.",
-    slug: "behind-the-scenes-workshop",
-    imageUrl: "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=600&h=400&fit=crop&crop=center",
-    category: "Behind",
-    date: "2026-03-05",
-  },
-  {
-    id: "6",
-    title: "Gift guide: Meaningful handmade presents",
-    excerpt: "마음을 담은 선물, 핸드메이드 소품 추천 가이드.",
-    slug: "gift-guide-handmade",
-    imageUrl: "https://images.unsplash.com/photo-1513558161293-cdaf765ed514?w=600&h=400&fit=crop&crop=center",
-    category: "Guide",
-    date: "2026-02-28",
-  },
-];
+export interface MagazineCategory {
+  id: string;
+  name: string;
+}
 
-export async function getMagazinePosts(): Promise<MagazinePost[]> {
-  return DUMMY_POSTS;
+export async function getMagazinePosts(categoryId?: string): Promise<MagazinePost[]> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("pb_magazine")
+    .select("*, pb_magazine_categories(name)")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false });
+
+  if (categoryId) {
+    query = query.eq("category_id", categoryId);
+  }
+
+  const { data } = await query;
+
+  return (data ?? []).map((p: Record<string, unknown>) => ({
+    id: p.id as string,
+    title: p.title as string,
+    excerpt: (p.excerpt as string) ?? "",
+    slug: p.slug as string,
+    imageUrl: (p.image_url as string) ?? "",
+    content: p.content as string | null,
+    category: ((p.pb_magazine_categories as Record<string, unknown> | null)?.name as string) ?? "",
+    categoryId: p.category_id as string | null,
+    date: p.created_at as string,
+  }));
+}
+
+export async function getMagazinePost(slug: string): Promise<MagazinePost | null> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("pb_magazine")
+    .select("*, pb_magazine_categories(name)")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    excerpt: data.excerpt ?? "",
+    slug: data.slug,
+    imageUrl: data.image_url ?? "",
+    content: data.content,
+    category: (data.pb_magazine_categories as Record<string, unknown> | null)?.name as string ?? "",
+    categoryId: data.category_id,
+    date: data.created_at,
+  };
+}
+
+export async function getMagazineCategories(): Promise<MagazineCategory[]> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("pb_magazine_categories")
+    .select("id, name")
+    .order("sort_order", { ascending: true });
+
+  return (data ?? []) as MagazineCategory[];
 }
