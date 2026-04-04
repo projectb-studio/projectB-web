@@ -161,6 +161,26 @@ export type DbBanner = {
   created_at: string;
 };
 
+export type DbMagazineCategory = {
+  id: string;
+  name: string;
+  sort_order: number;
+  created_at: string;
+};
+
+export type DbMagazinePost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string | null;
+  image_url: string | null;
+  category_id: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 // ---- Supabase Database type (for createBrowserClient/createServerClient generics) ----
 
 export type Database = {
@@ -242,6 +262,18 @@ export type Database = {
         Row: DbBanner;
         Insert: Omit<DbBanner, "id" | "created_at">;
         Update: Partial<Omit<DbBanner, "id" | "created_at">>;
+        Relationships: [];
+      };
+      pb_magazine_categories: {
+        Row: DbMagazineCategory;
+        Insert: Omit<DbMagazineCategory, "id" | "created_at">;
+        Update: Partial<Omit<DbMagazineCategory, "id" | "created_at">>;
+        Relationships: [];
+      };
+      pb_magazine: {
+        Row: DbMagazinePost;
+        Insert: Omit<DbMagazinePost, "id" | "created_at" | "updated_at">;
+        Update: Partial<Omit<DbMagazinePost, "id" | "created_at" | "updated_at">>;
         Relationships: [];
       };
     };
