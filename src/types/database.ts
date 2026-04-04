@@ -120,6 +120,7 @@ export type DbReview = {
   content: string | null;
   image_urls: string[] | null;
   is_published: boolean;
+  is_hidden: boolean;
   admin_reply: string | null;
   created_at: string;
 };
@@ -134,7 +135,7 @@ export type DbCsInquiry = {
   author_email: string | null;
   author_phone: string | null;
   company_name: string | null;
-  status: "waiting" | "answered";
+  status: "received" | "in_progress" | "answered" | "closed";
   answer: string | null;
   created_at: string;
   updated_at: string;
