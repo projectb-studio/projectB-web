@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("pb_faq")
+  const { data, error } = await (supabase
+    .from("pb_faq") as ReturnType<typeof supabase.from>)
     .select("*")
     .order("sort_order", { ascending: true });
 
