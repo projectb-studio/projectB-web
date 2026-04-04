@@ -57,16 +57,17 @@ export async function getMagazinePost(slug: string): Promise<MagazinePost | null
 
   if (!data) return null;
 
+  const row = data as Record<string, unknown>;
   return {
-    id: data.id,
-    title: data.title,
-    excerpt: data.excerpt ?? "",
-    slug: data.slug,
-    imageUrl: data.image_url ?? "",
-    content: data.content,
-    category: (data.pb_magazine_categories as Record<string, unknown> | null)?.name as string ?? "",
-    categoryId: data.category_id,
-    date: data.created_at,
+    id: row.id as string,
+    title: row.title as string,
+    excerpt: (row.excerpt as string) ?? "",
+    slug: row.slug as string,
+    imageUrl: (row.image_url as string) ?? "",
+    content: row.content as string | null,
+    category: ((row.pb_magazine_categories as Record<string, unknown> | null)?.name as string) ?? "",
+    categoryId: row.category_id as string | null,
+    date: row.created_at as string,
   };
 }
 
