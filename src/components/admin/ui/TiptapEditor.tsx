@@ -24,7 +24,7 @@ interface TiptapEditorProps {
   placeholder?: string;
 }
 
-export default function TiptapEditor({ content, onChange, placeholder }: TiptapEditorProps) {
+export default function TiptapEditor({ content, onChange, placeholder: _placeholder }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
