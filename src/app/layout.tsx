@@ -4,6 +4,8 @@ import "@/styles/globals.css";
 import { SITE_CONFIG } from "@/constants/site";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { getThemeId } from "@/lib/data/settings";
+import { getThemePreset, themeToStyleString } from "@/constants/themes";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -71,13 +73,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const themeId = await getThemeId();
+  const theme = getThemePreset(themeId);
+  const themeStyle = themeToStyleString(theme);
+
   return (
     <html lang="ko" className={archivo.variable}>
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: `:root { ${themeStyle} }` }} />
+      </head>
       <body className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">{children}</main>
