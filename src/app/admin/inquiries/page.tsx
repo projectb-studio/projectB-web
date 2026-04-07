@@ -18,12 +18,10 @@ const STATUS_LABELS: Record<string, string> = {
   in_progress: "처리중",
   answered: "답변완료",
   closed: "종료",
-  waiting: "대기",
 };
 
 const STATUS_COLORS: Record<string, string> = {
   received: "text-[var(--pb-silver)]",
-  waiting: "text-[var(--pb-silver)]",
   in_progress: "text-blue-600",
   answered: "text-[#2D8F4E]",
   closed: "text-[var(--pb-gray)]",
@@ -37,7 +35,7 @@ const TYPE_LABELS: Record<string, string> = {
   etc: "기타",
 };
 
-type FilterType = "all" | "received" | "waiting" | "in_progress" | "answered" | "closed";
+type FilterType = "all" | "received" | "in_progress" | "answered" | "closed";
 
 export default function AdminInquiriesPage() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -57,7 +55,7 @@ export default function AdminInquiriesPage() {
 
   const filterTabs: { key: FilterType; label: string }[] = [
     { key: "all", label: `전체 (${inquiries.length})` },
-    { key: "received", label: `접수 (${inquiries.filter((i) => i.status === "received" || i.status === "waiting").length})` },
+    { key: "received", label: `접수 (${inquiries.filter((i) => i.status === "received").length})` },
     { key: "in_progress", label: `처리중 (${inquiries.filter((i) => i.status === "in_progress").length})` },
     { key: "answered", label: `답변완료 (${inquiries.filter((i) => i.status === "answered").length})` },
     { key: "closed", label: `종료 (${inquiries.filter((i) => i.status === "closed").length})` },

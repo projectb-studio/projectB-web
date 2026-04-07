@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
 
     if (!hasSession) {
       const loginUrl = new URL("/auth", request.url);
-      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      loginUrl.searchParams.set("next", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
   }

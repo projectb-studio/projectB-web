@@ -11,7 +11,7 @@ export default async function AdminDashboardPage() {
       .select("id", { count: "exact", head: true }),
     (supabase.from("pb_cs_inquiries") as ReturnType<typeof supabase.from>)
       .select("id", { count: "exact", head: true })
-      .eq("status", "waiting"),
+      .eq("status", "received"),
     (supabase.from("pb_reviews") as ReturnType<typeof supabase.from>)
       .select("id", { count: "exact", head: true })
       .is("admin_reply", null),
