@@ -181,6 +181,12 @@ export type DbMagazinePost = {
   updated_at: string;
 };
 
+export type DbSiteSettings = {
+  id: string;
+  theme_id: string;
+  updated_at: string;
+};
+
 // ---- Supabase Database type (for createBrowserClient/createServerClient generics) ----
 
 export type Database = {
@@ -274,6 +280,12 @@ export type Database = {
         Row: DbMagazinePost;
         Insert: Omit<DbMagazinePost, "id" | "created_at" | "updated_at">;
         Update: Partial<Omit<DbMagazinePost, "id" | "created_at" | "updated_at">>;
+        Relationships: [];
+      };
+      pb_site_settings: {
+        Row: DbSiteSettings;
+        Insert: Omit<DbSiteSettings, "id" | "updated_at">;
+        Update: Partial<Omit<DbSiteSettings, "id" | "updated_at">>;
         Relationships: [];
       };
     };

@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Megaphone,
   Newspaper,
+  Settings,
 } from "lucide-react";
 
 export const ADMIN_NAV_ITEMS = [
@@ -18,4 +19,5 @@ export const ADMIN_NAV_ITEMS = [
   { label: "리뷰 관리", href: "/admin/reviews", icon: Star },
   { label: "문의 관리", href: "/admin/inquiries", icon: MessageSquare },
   { label: "공지사항", href: "/admin/notices", icon: Megaphone },
+  { label: "사이트 설정", href: "/admin/settings", icon: Settings },
 ] as const;
