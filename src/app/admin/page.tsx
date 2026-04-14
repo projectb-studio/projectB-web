@@ -24,11 +24,16 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
         <AdminCard label="Total Products" value={productCount} />
         <AdminCard label="Total Orders" value={orderCount} />
         <AdminCard label="Pending Inquiries" value={pendingInquiries} sub="답변 대기" />
         <AdminCard label="Unreplied Reviews" value={unrepliedReviews} sub="답변 미작성" />
+      </div>
+      <div className="mb-8">
+        <a href="/admin/stats" className="text-xs text-[var(--pb-gray)] hover:text-[var(--pb-jet-black)] underline">
+          자세한 통계 보기 →
+        </a>
       </div>
 
       <div className="border border-[var(--pb-light-gray)] bg-white p-6">
