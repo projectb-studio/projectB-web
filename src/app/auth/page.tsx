@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -69,6 +69,12 @@ function AuthContent() {
   const nextPath = searchParams.get("next") ?? "/mypage";
   const supabase = createClient();
 
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err === "blocked") setError("차단된 계정입니다. 관리자에게 문의해주세요.");
+    else if (err === "auth_failed") setError("로그인에 실패했습니다. 다시 시도해주세요.");
+  }, [searchParams]);
+
   async function handleSocialLogin(provider: SocialProviderId) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -122,13 +128,25 @@ function AuthContent() {
     }
 
     // Login
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error: signInError, data: signInData } =
+      await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
+    if (signInError || !signInData?.user) {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      setLoading(false);
+      return;
+    }
+
+    // 차단 체크
+    const { data: profile } = await supabase
+      .from("pb_users_profile")
+      .select("is_blocked")
+      .eq("user_id", signInData.user.id)
+      .single<{ is_blocked: boolean | null }>();
+
+    if (profile?.is_blocked === true) {
+      await supabase.auth.signOut();
+      setError("차단된 계정입니다. 관리자에게 문의해주세요.");
       setLoading(false);
       return;
     }

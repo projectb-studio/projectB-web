@@ -8,13 +8,17 @@ import {
   Megaphone,
   Newspaper,
   Settings,
+  Users,
+  BarChart3,
 } from "lucide-react";
 
 export const ADMIN_NAV_ITEMS = [
   { label: "대시보드", href: "/admin", icon: LayoutDashboard },
+  { label: "통계", href: "/admin/stats", icon: BarChart3 },
   { label: "상품 관리", href: "/admin/products", icon: Package },
   { label: "콘텐츠 편집", href: "/admin/content/hero", icon: PanelTop },
   { label: "주문 관리", href: "/admin/orders", icon: ShoppingCart },
+  { label: "회원 관리", href: "/admin/members", icon: Users },
   { label: "매거진", href: "/admin/magazine", icon: Newspaper },
   { label: "리뷰 관리", href: "/admin/reviews", icon: Star },
   { label: "문의 관리", href: "/admin/inquiries", icon: MessageSquare },
