@@ -13,10 +13,12 @@ DECLARE
 BEGIN
 
 -- 기존 상품 ID 가져오기 (최대 5개)
-SELECT ARRAY_AGG(id ORDER BY sort_order LIMIT 5)
-INTO v_product_ids
-FROM pb_products
-WHERE is_published = true;
+SELECT ARRAY(
+  SELECT id FROM pb_products
+  WHERE is_published = true
+  ORDER BY sort_order
+  LIMIT 5
+) INTO v_product_ids;
 
 -- 상품이 없으면 중단
 IF v_product_ids IS NULL OR array_length(v_product_ids, 1) IS NULL THEN

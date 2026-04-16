@@ -11,11 +11,19 @@ export default function SingleImageInput({
   value: string;
   onChange: (url: string) => void;
 }) {
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function upload(files: FileList | null) {
     if (!files || files.length === 0) return;
+    setError(null);
+    if (files[0].size > MAX_SIZE) {
+      setError(`파일이 너무 큽니다 (${(files[0].size / 1024 / 1024).toFixed(1)}MB). 최대 10MB까지 업로드 가능합니다.`);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     setUploading(true);
     const fd = new FormData();
     fd.append("file", files[0]);
@@ -23,6 +31,8 @@ export default function SingleImageInput({
     if (res.ok) {
       const { url } = await res.json();
       onChange(url);
+    } else {
+      setError("업로드에 실패했습니다. 다시 시도해주세요.");
     }
     setUploading(false);
     if (inputRef.current) inputRef.current.value = "";
@@ -59,6 +69,7 @@ export default function SingleImageInput({
         className="hidden"
         onChange={(e) => upload(e.target.files)}
       />
+      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
     </div>
   );
 }

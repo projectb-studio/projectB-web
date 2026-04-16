@@ -16,11 +16,22 @@ interface ImageUploaderProps {
 }
 
 export function ImageUploader({ images, onChange }: ImageUploaderProps) {
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
+    setError(null);
+
+    const oversized = Array.from(files).find((f) => f.size > MAX_SIZE);
+    if (oversized) {
+      setError(`"${oversized.name}" 파일이 너무 큽니다 (${(oversized.size / 1024 / 1024).toFixed(1)}MB). 최대 10MB까지 가능합니다.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
 
     const newImages = [...images];
@@ -102,6 +113,7 @@ export function ImageUploader({ images, onChange }: ImageUploaderProps) {
         onChange={(e) => handleUpload(e.target.files)}
         className="hidden"
       />
+      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>
   );
 }
