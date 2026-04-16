@@ -5,6 +5,8 @@
 - 전제: 기존 관리자 대시보드(P4), `pb_` 테이블 13종, Supabase Auth, tiptap 의존성 이미 존재
 - 다음 세션 범위(별도 스펙): 소셜 로그인(Kakao/Naver/Google/Apple), 카카오 알림톡
 
+> **2026-04-14 구현 후 정정**: 본 스펙은 `pb_users` 테이블을 가정하나, 실제 DB 구조는 `pb_users_profile`이며 email/password는 외부 `auth.users` 테이블이다. 실제 마이그레이션·RPC·API는 모두 `pb_users_profile + auth.users` 조인 방식으로 구현됨. 컬럼명 `name → full_name`, 식별자는 `user_id`(auth UUID).
+
 ---
 
 ## 0. 의사결정 요약 (브레인스토밍 결과)

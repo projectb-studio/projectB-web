@@ -43,7 +43,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             href="/admin"
             className="font-heading text-sm tracking-[0.25em] text-white uppercase"
           >
-            PB Admin
+            관리자
           </Link>
           <button
             onClick={onClose}

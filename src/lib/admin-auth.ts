@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { DbUserProfile } from "@/types/database";
 
 /**
  * Check if current authenticated user has admin role.
- * Returns the user profile if admin, null otherwise.
+ * 1. Server client (anon key) 로 auth session 확인
+ * 2. Admin client (service_role, RLS bypass) 로 profile 조회
  */
 export async function getAdminUser(): Promise<DbUserProfile | null> {
   const supabase = await createClient();
@@ -11,8 +13,9 @@ export async function getAdminUser(): Promise<DbUserProfile | null> {
 
   if (!user) return null;
 
-  const { data: profile } = await (supabase
-    .from("pb_users_profile") as ReturnType<typeof supabase.from>)
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
+    .from("pb_users_profile")
     .select("*")
     .eq("user_id", user.id)
     .single();

@@ -89,7 +89,7 @@ export default function AdminMembersPage() {
 
       <div className="border border-[var(--pb-light-gray)]">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--pb-off-white)] text-xs uppercase tracking-wider">
+          <thead className="bg-[var(--pb-off-white)] text-xs tracking-wider">
             <tr>
               <th className="px-4 py-3 text-left">이름</th>
               <th className="px-4 py-3 text-left">이메일</th>

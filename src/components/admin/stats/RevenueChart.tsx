@@ -15,7 +15,7 @@ type Row = { day: string; revenue: number };
 export default function RevenueChart({ data }: { data: Row[] }) {
   return (
     <div className="border border-[var(--pb-light-gray)] p-4">
-      <h3 className="text-xs uppercase tracking-wider text-[var(--pb-gray)] mb-3">
+      <h3 className="text-xs tracking-wider text-[var(--pb-gray)] mb-3">
         매출 추이
       </h3>
       {data.length === 0 ? (

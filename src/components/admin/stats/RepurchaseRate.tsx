@@ -9,7 +9,7 @@ export default function RepurchaseRate({
 
   return (
     <div className="border border-[var(--pb-light-gray)] p-5">
-      <h3 className="text-xs uppercase tracking-wider text-[var(--pb-gray)] mb-3">
+      <h3 className="text-xs tracking-wider text-[var(--pb-gray)] mb-3">
         재구매율
       </h3>
       <div className="flex items-baseline gap-4">

@@ -62,7 +62,7 @@ function Card({
   const negative = delta?.startsWith("-");
   return (
     <div className="border border-[var(--pb-light-gray)] p-4">
-      <div className="text-xs uppercase tracking-wider text-[var(--pb-gray)]">{label}</div>
+      <div className="text-xs tracking-wider text-[var(--pb-gray)]">{label}</div>
       <div className="text-2xl mt-1 tabular-nums">{value}</div>
       {delta && (
         <div

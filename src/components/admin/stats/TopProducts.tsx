@@ -5,7 +5,7 @@ export default function TopProducts({
 }) {
   return (
     <div className="border border-[var(--pb-light-gray)] p-4">
-      <h3 className="text-xs uppercase tracking-wider text-[var(--pb-gray)] mb-3">
+      <h3 className="text-xs tracking-wider text-[var(--pb-gray)] mb-3">
         베스트 상품 TOP 10
       </h3>
       {data.length === 0 ? (
@@ -14,7 +14,7 @@ export default function TopProducts({
         </p>
       ) : (
         <table className="w-full text-sm">
-          <thead className="text-xs uppercase tracking-wider text-[var(--pb-gray)]">
+          <thead className="text-xs tracking-wider text-[var(--pb-gray)]">
             <tr className="border-b border-[var(--pb-light-gray)]">
               <th className="text-left py-2 w-8">#</th>
               <th className="text-left py-2">상품</th>

@@ -25,10 +25,10 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
-        <AdminCard label="Total Products" value={productCount} />
-        <AdminCard label="Total Orders" value={orderCount} />
-        <AdminCard label="Pending Inquiries" value={pendingInquiries} sub="답변 대기" />
-        <AdminCard label="Unreplied Reviews" value={unrepliedReviews} sub="답변 미작성" />
+        <AdminCard label="전체 상품" value={productCount} />
+        <AdminCard label="전체 주문" value={orderCount} />
+        <AdminCard label="대기 문의" value={pendingInquiries} sub="답변 대기" />
+        <AdminCard label="미답변 리뷰" value={unrepliedReviews} sub="답변 미작성" />
       </div>
       <div className="mb-8">
         <a href="/admin/stats" className="text-xs text-[var(--pb-gray)] hover:text-[var(--pb-jet-black)] underline">
@@ -38,7 +38,7 @@ export default async function AdminDashboardPage() {
 
       <div className="border border-[var(--pb-light-gray)] bg-white p-6">
         <h2 className="font-heading text-xs tracking-[0.15em] uppercase font-semibold mb-4">
-          Quick Actions
+          빠른 작업
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <a href="/admin/products/new" className="btn-primary text-center text-xs py-3">

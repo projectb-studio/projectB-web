@@ -110,7 +110,7 @@ export default function AdminMemberDetailPage() {
         </div>
         <div className="flex flex-wrap gap-4 items-center pt-3 border-t border-[var(--pb-off-white)]">
           <label className="flex items-center gap-2 text-sm">
-            <span className="text-xs uppercase text-[var(--pb-gray)]">등급</span>
+            <span className="text-xs text-[var(--pb-gray)]">등급</span>
             <select
               value={grade}
               onChange={(e) => {
@@ -142,7 +142,7 @@ export default function AdminMemberDetailPage() {
           </span>
         </div>
         <div className="pt-3 border-t border-[var(--pb-off-white)]">
-          <label className="block text-xs uppercase text-[var(--pb-gray)] mb-1.5">
+          <label className="block text-xs text-[var(--pb-gray)] mb-1.5">
             관리 메모 <span className="normal-case">({memo.length}/5000)</span>
           </label>
           <textarea
@@ -166,7 +166,7 @@ export default function AdminMemberDetailPage() {
         <h2 className="heading-display text-sm tracking-wide mb-3">최근 주문 (최대 20건)</h2>
         <div className="border border-[var(--pb-light-gray)]">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--pb-off-white)] text-xs uppercase tracking-wider">
+            <thead className="bg-[var(--pb-off-white)] text-xs tracking-wider">
               <tr>
                 <th className="px-4 py-2 text-left">주문</th>
                 <th className="px-4 py-2 text-left">일시</th>
@@ -201,7 +201,7 @@ export default function AdminMemberDetailPage() {
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs uppercase text-[var(--pb-gray)] mb-0.5">{label}</div>
+      <div className="text-xs text-[var(--pb-gray)] mb-0.5">{label}</div>
       <div className="text-sm">{value}</div>
     </div>
   );
@@ -210,7 +210,7 @@ function Info({ label, value }: { label: string; value: string }) {
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="border border-[var(--pb-light-gray)] p-4">
-      <div className="text-xs uppercase text-[var(--pb-gray)]">{label}</div>
+      <div className="text-xs text-[var(--pb-gray)]">{label}</div>
       <div className="text-xl mt-1 tabular-nums">{value}</div>
     </div>
   );
