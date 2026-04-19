@@ -329,4 +329,6 @@ export interface Product {
   care?: string;
   material?: string;
   options?: ProductOptions;
+  // CMS 블록형 상세 페이지 (없거나 빈 배열이면 description으로 폴백)
+  detailBlocks?: unknown[];
 }

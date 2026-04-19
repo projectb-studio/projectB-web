@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { ProductForm } from "@/components/admin/forms/ProductForm";
 
 interface EditProductPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 interface ProductData {
@@ -25,7 +25,7 @@ interface ProductData {
 }
 
 export default function EditProductPage({ params }: EditProductPageProps) {
-  const { id } = use(params);
+  const { id } = params;
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -87,9 +87,17 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
   return (
     <div>
-      <h2 className="font-heading text-xs tracking-[0.15em] uppercase font-semibold mb-6">
-        상품 수정
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-heading text-xs tracking-[0.15em] uppercase font-semibold">
+          상품 수정
+        </h2>
+        <a
+          href={`/admin/products/${product.id}/detail-editor`}
+          className="btn-secondary text-xs px-4 py-2"
+        >
+          상세 페이지 편집
+        </a>
+      </div>
       <ProductForm initialData={initialData} />
     </div>
   );

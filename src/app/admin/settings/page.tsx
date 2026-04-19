@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
     });
     if (res.ok) {
       setCurrentTheme(themeId);
-      alert("테마가 변경되었습니다. 새로고침하면 적용됩니다.");
+      window.location.reload();
     }
     setSaving(false);
   }

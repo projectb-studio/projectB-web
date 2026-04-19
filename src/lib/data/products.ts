@@ -56,6 +56,9 @@ function dbToProduct(
     shipping: (row.shipping as string | null) ?? undefined,
     care: (row.care as string | null) ?? undefined,
     material: row.tag as string,
+    detailBlocks: Array.isArray(row.detail_blocks)
+      ? (row.detail_blocks as unknown[])
+      : undefined,
     options:
       colorOptions.length > 0 || sizeOptions.length > 0
         ? {

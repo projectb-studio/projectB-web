@@ -8,6 +8,8 @@ import { ProductInfo } from "@/components/product/ProductInfo";
 import { ProductReviews } from "@/components/product/ProductReviews";
 import { TrackView } from "@/components/product/TrackView";
 import { RecentlyViewed } from "@/components/common/RecentlyViewed";
+import DetailBlocksRenderer from "@/lib/detail-blocks/renderer";
+import type { Block } from "@/lib/detail-blocks/schema";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -62,6 +64,13 @@ export default async function ProductDetailPage({
         {/* Right: Product info */}
         <ProductInfo product={product} />
       </div>
+
+      {/* Detail blocks (CMS-edited) */}
+      {product.detailBlocks && product.detailBlocks.length > 0 && (
+        <div className="mt-16 max-w-3xl mx-auto">
+          <DetailBlocksRenderer blocks={product.detailBlocks as Block[]} />
+        </div>
+      )}
 
       {/* Divider */}
       <div className="h-px bg-pb-light-gray/40 mt-12" />

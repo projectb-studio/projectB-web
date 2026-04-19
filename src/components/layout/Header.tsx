@@ -6,14 +6,45 @@ import { Menu, X, Search, ShoppingBag, User } from "lucide-react";
 import { NAV_ITEMS, SITE_CONFIG } from "@/constants/site";
 import { useCartStore } from "@/stores/cart";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
+import { createClient } from "@/lib/supabase/client";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const totalItems = useCartStore((s) => s.totalItems());
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const { isLoggedIn: logged, isAdmin: admin } = await res.json();
+          setIsLoggedIn(logged);
+          setIsAdmin(admin);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    checkAuth();
+
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+      if (!session) {
+        setIsAdmin(false);
+      } else {
+        checkAuth();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--pb-snow)] border-b border-[var(--pb-border)]">
@@ -66,7 +97,15 @@ export function Header() {
             >
               <Search size={18} strokeWidth={1.5} />
             </button>
-            <Link href="/auth" aria-label="Account" className="p-2">
+            {mounted && isAdmin && (
+              <Link
+                href="/admin"
+                className="font-heading text-[10px] tracking-[0.15em] uppercase border border-[var(--pb-jet-black)] px-2 py-1 hover:bg-[var(--pb-jet-black)] hover:text-white transition-colors"
+              >
+                관리자
+              </Link>
+            )}
+            <Link href={isLoggedIn ? "/mypage" : "/auth"} aria-label="Account" className="p-2">
               <User size={18} strokeWidth={1.5} />
             </Link>
             <Link
