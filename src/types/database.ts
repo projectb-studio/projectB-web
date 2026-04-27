@@ -72,10 +72,20 @@ export type DbBrandContent = {
   updated_at: string;
 };
 
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "preparing"
+  | "shipped"
+  | "delivered"
+  | "confirmed"
+  | "cancelled"
+  | "refunded";
+
 export type DbOrder = {
   id: string;
   user_id: string | null;
-  status: "pending" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled" | "refunded";
+  status: OrderStatus;
   total_amount: number;
   shipping_fee: number;
   shipping_address: Record<string, unknown> | null;
@@ -101,12 +111,19 @@ export type DbOrderItem = {
   created_at: string;
 };
 
+export type MemberGrade = "bronze" | "silver" | "gold" | "vip";
+
 export type DbUserProfile = {
   id: string;
   user_id: string;
   full_name: string | null;
   phone: string | null;
   role: "customer" | "admin";
+  grade: MemberGrade;
+  total_spent: number;
+  point_balance: number;
+  admin_memo: string | null;
+  is_blocked: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -185,6 +202,105 @@ export type DbSiteSettings = {
   id: string;
   theme_id: string;
   updated_at: string;
+};
+
+// ---- Admin v2 ----
+
+export type DbShippingSettings = {
+  id: number;
+  default_fee: number;
+  free_threshold: number;
+  courier: string;
+  return_address: Record<string, unknown>;
+  estimated_days: string;
+  notes: string | null;
+  updated_at: string;
+};
+
+export type OrderRequestType = "cancel" | "return" | "exchange";
+export type OrderRequestStatus = "pending" | "approved" | "rejected" | "completed";
+
+export type DbOrderRequest = {
+  id: string;
+  order_id: string;
+  type: OrderRequestType;
+  status: OrderRequestStatus;
+  reason: string | null;
+  admin_note: string | null;
+  refund_amount: number | null;
+  requested_at: string;
+  processed_at: string | null;
+  created_at: string;
+};
+
+export type DbCategory = {
+  id: string;
+  slug: string;
+  name: string;
+  display_order: number;
+  is_visible: boolean;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CouponType = "percent" | "amount";
+
+export type DbCoupon = {
+  id: string;
+  code: string;
+  name: string;
+  type: CouponType;
+  value: number;
+  min_order_amount: number;
+  max_discount_amount: number | null;
+  usage_limit: number | null;
+  usage_count: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type DbCouponUsage = {
+  id: string;
+  coupon_id: string;
+  user_id: string | null;
+  order_id: string | null;
+  discount_amount: number;
+  used_at: string;
+};
+
+export type PointType = "earn" | "use" | "expire" | "manual_grant" | "refund";
+
+export type DbPoint = {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: PointType;
+  reason: string | null;
+  order_id: string | null;
+  balance_after: number;
+  created_at: string;
+};
+
+export type TaxInvoiceStatus = "requested" | "issued" | "cancelled";
+
+export type DbTaxInvoice = {
+  id: string;
+  order_id: string | null;
+  invoice_number: string | null;
+  company_name: string;
+  business_number: string;
+  representative: string | null;
+  address: string | null;
+  email: string | null;
+  supply_amount: number;
+  vat_amount: number;
+  total_amount: number;
+  status: TaxInvoiceStatus;
+  issued_at: string | null;
+  created_at: string;
 };
 
 // ---- Supabase Database type (for createBrowserClient/createServerClient generics) ----
@@ -286,6 +402,48 @@ export type Database = {
         Row: DbSiteSettings;
         Insert: Omit<DbSiteSettings, "id" | "updated_at">;
         Update: Partial<Omit<DbSiteSettings, "id" | "updated_at">>;
+        Relationships: [];
+      };
+      pb_shipping_settings: {
+        Row: DbShippingSettings;
+        Insert: Partial<DbShippingSettings> & { id?: number };
+        Update: Partial<Omit<DbShippingSettings, "id" | "updated_at">>;
+        Relationships: [];
+      };
+      pb_order_requests: {
+        Row: DbOrderRequest;
+        Insert: Omit<DbOrderRequest, "id" | "requested_at" | "created_at">;
+        Update: Partial<Omit<DbOrderRequest, "id" | "created_at">>;
+        Relationships: [];
+      };
+      pb_categories: {
+        Row: DbCategory;
+        Insert: Omit<DbCategory, "id" | "created_at" | "updated_at">;
+        Update: Partial<Omit<DbCategory, "id" | "created_at" | "updated_at">>;
+        Relationships: [];
+      };
+      pb_coupons: {
+        Row: DbCoupon;
+        Insert: Omit<DbCoupon, "id" | "usage_count" | "created_at">;
+        Update: Partial<Omit<DbCoupon, "id" | "created_at">>;
+        Relationships: [];
+      };
+      pb_coupon_usages: {
+        Row: DbCouponUsage;
+        Insert: Omit<DbCouponUsage, "id" | "used_at">;
+        Update: Partial<Omit<DbCouponUsage, "id" | "used_at">>;
+        Relationships: [];
+      };
+      pb_points: {
+        Row: DbPoint;
+        Insert: Omit<DbPoint, "id" | "created_at">;
+        Update: Partial<Omit<DbPoint, "id" | "created_at">>;
+        Relationships: [];
+      };
+      pb_tax_invoices: {
+        Row: DbTaxInvoice;
+        Insert: Omit<DbTaxInvoice, "id" | "created_at">;
+        Update: Partial<Omit<DbTaxInvoice, "id" | "created_at">>;
         Relationships: [];
       };
     };

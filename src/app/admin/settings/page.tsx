@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { THEME_PRESETS } from "@/constants/themes";
+import { SettingsNav } from "@/components/admin/settings/SettingsNav";
 
 export default function AdminSettingsPage() {
   const [currentTheme, setCurrentTheme] = useState("");
@@ -44,6 +45,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
+      <SettingsNav />
       <div className="mb-6">
         <h2 className="font-heading text-xs tracking-[0.15em] uppercase font-semibold mb-1">사이트 테마</h2>
         <p className="text-xs text-[var(--pb-gray)]">사이트 전체 색감을 변경합니다.</p>

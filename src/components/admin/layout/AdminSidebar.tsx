@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ADMIN_NAV_ITEMS } from "@/constants/admin";
+import { ADMIN_NAV_GROUPS } from "@/constants/admin";
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -16,6 +16,13 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
+    // Exact match for /admin/products vs /admin/products/categories
+    if (href === "/admin/products") {
+      return pathname === "/admin/products" || (pathname.startsWith("/admin/products/") && !pathname.startsWith("/admin/products/categories"));
+    }
+    if (href === "/admin/orders") {
+      return pathname === "/admin/orders" || /^\/admin\/orders\/(?!cancellations|returns|exchanges)/.test(pathname);
+    }
     return pathname.startsWith(href);
   };
 
@@ -38,7 +45,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-5 border-b border-white/10">
+        <div className="flex items-center justify-between h-16 px-5 border-b border-white/10 shrink-0">
           <Link
             href="/admin"
             className="font-heading text-sm tracking-[0.25em] text-white uppercase"
@@ -48,37 +55,45 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           <button
             onClick={onClose}
             className="lg:hidden text-white/50 hover:text-white transition-colors"
+            aria-label="사이드바 닫기"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 overflow-y-auto">
-          {ADMIN_NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  "flex items-center gap-3 px-5 py-3 text-sm transition-colors",
-                  active
-                    ? "text-white bg-white/10"
-                    : "text-white/50 hover:text-white hover:bg-white/5"
-                )}
-              >
-                <Icon size={16} strokeWidth={1.5} />
-                {item.label}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 py-3 overflow-y-auto">
+          {ADMIN_NAV_GROUPS.map((group) => (
+            <div key={group.label} className="mb-3">
+              <div className="px-5 py-2 text-[10px] uppercase tracking-[0.2em] text-white/30 font-heading font-semibold">
+                {group.label}
+              </div>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center gap-3 px-5 py-2.5 text-sm transition-colors",
+                      active
+                        ? "text-white bg-white/10"
+                        : "text-white/50 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <Icon size={16} strokeWidth={1.5} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Footer: back to site */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 shrink-0">
           <Link
             href="/"
             className="text-xs text-white/30 hover:text-white/60 transition-colors"
