@@ -303,6 +303,29 @@ export type DbTaxInvoice = {
   created_at: string;
 };
 
+// ---- AI Draft Review ----
+
+export type DraftStatus = "pending" | "published" | "rejected";
+export type DraftSource = "ai" | "manual";
+
+export type DbProductDetailDraft = {
+  id: string;
+  product_id: string;
+  status: DraftStatus;
+  blocks: unknown; // Block[] — validated via BlocksSchema at the API boundary
+  source: DraftSource;
+  generator: string | null;
+  generation_meta: Record<string, unknown>;
+  parent_draft_id: string | null;
+  revision: number;
+  feedback: string | null;
+  review_note: string | null;
+  reviewed_by: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  published_at: string | null;
+};
+
 // ---- Supabase Database type (for createBrowserClient/createServerClient generics) ----
 
 export type Database = {
@@ -324,6 +347,12 @@ export type Database = {
         Row: DbProductOption;
         Insert: Omit<DbProductOption, "id" | "created_at">;
         Update: Partial<Omit<DbProductOption, "id" | "created_at">>;
+        Relationships: [];
+      };
+      pb_product_detail_drafts: {
+        Row: DbProductDetailDraft;
+        Insert: Omit<DbProductDetailDraft, "id" | "created_at">;
+        Update: Partial<Omit<DbProductDetailDraft, "id" | "created_at">>;
         Relationships: [];
       };
       pb_hero_settings: {

@@ -91,12 +91,20 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         <h2 className="font-heading text-xs tracking-[0.15em] uppercase font-semibold">
           상품 수정
         </h2>
-        <a
-          href={`/admin/products/${product.id}/detail-editor`}
-          className="btn-secondary text-xs px-4 py-2"
-        >
-          상세 페이지 편집
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/admin/products/${product.id}/drafts`}
+            className="btn-secondary text-xs px-4 py-2"
+          >
+            AI 초안
+          </a>
+          <a
+            href={`/admin/products/${product.id}/detail-editor`}
+            className="btn-secondary text-xs px-4 py-2"
+          >
+            상세 페이지 편집
+          </a>
+        </div>
       </div>
       <ProductForm initialData={initialData} />
     </div>
