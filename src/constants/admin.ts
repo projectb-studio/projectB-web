@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Package,
   PanelTop,
+  Sparkles,
   ShoppingCart,
   Star,
   MessageSquare,
@@ -42,6 +43,7 @@ export const ADMIN_NAV_GROUPS: readonly AdminNavGroup[] = [
     label: "상품 · 콘텐츠",
     items: [
       { label: "상품 관리", href: "/admin/products", icon: Package },
+      { label: "AI 초안 검수", href: "/admin/drafts", icon: Sparkles },
       { label: "카테고리", href: "/admin/products/categories", icon: Tag },
       { label: "콘텐츠 편집", href: "/admin/content/hero", icon: PanelTop },
       { label: "매거진", href: "/admin/magazine", icon: Newspaper },

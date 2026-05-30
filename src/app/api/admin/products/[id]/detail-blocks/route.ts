@@ -1,48 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { BlocksSchema, type Block } from "@/lib/detail-blocks/schema";
-import { sanitizeRichText } from "@/lib/detail-blocks/sanitize";
-
-const R2_PREFIX = process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? "";
-// Supabase Storage URL도 허용 (현재 업로드 경로)
-const SUPABASE_PREFIX =
-  (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "") + "/storage/v1/object/public/";
-
-function isAllowedImageUrl(url: string): boolean {
-  if (R2_PREFIX && url.startsWith(R2_PREFIX)) return true;
-  if (SUPABASE_PREFIX && url.startsWith(SUPABASE_PREFIX)) return true;
-  return false;
-}
-
-function sanitizeBlocks(input: unknown): Block[] {
-  const parsed = BlocksSchema.parse(input);
-  return parsed.map((b) => {
-    if (b.type === "richtext") {
-      return { ...b, data: { html: sanitizeRichText(b.data.html) } };
-    }
-    if (b.type === "twocol") {
-      if (!isAllowedImageUrl(b.data.image.url) && b.data.image.url !== "") {
-        throw new Error("twocol image must be on R2 or Supabase Storage");
-      }
-      return {
-        ...b,
-        data: { ...b.data, text: { html: sanitizeRichText(b.data.text.html) } },
-      };
-    }
-    if (b.type === "image" && b.data.url !== "" && !isAllowedImageUrl(b.data.url)) {
-      throw new Error("image url must be on R2 or Supabase Storage");
-    }
-    if (b.type === "gallery") {
-      b.data.images.forEach((im) => {
-        if (im.url !== "" && !isAllowedImageUrl(im.url)) {
-          throw new Error("gallery url must be on R2 or Supabase Storage");
-        }
-      });
-    }
-    return b;
-  });
-}
+import { type Block } from "@/lib/detail-blocks/schema";
+import { sanitizeBlocks } from "@/lib/detail-blocks/sanitize-blocks";
 
 export async function GET(
   _req: Request,
