@@ -164,6 +164,25 @@ describe("runQualityLoop — 재생성 경로", () => {
   });
 });
 
+describe("runQualityLoop — 반려 후 재생성", () => {
+  it("직전 초안의 보이스를 첫 시도부터 모델에 넘긴다", async () => {
+    const provider = fakeProvider(["새 카피"]);
+    const prior = voiceWith("반려된 카피");
+
+    await runQualityLoop({
+      facts,
+      provider,
+      critics: [fakeCritic([9])],
+      maxAttempts: 1,
+      initialPreviousVoice: prior,
+      operatorFeedback: "컨셉을 더 짧게",
+    });
+
+    expect(provider.calls[0].previousVoice?.heroCaption).toBe("반려된 카피");
+    expect(provider.calls[0].feedback).toContain("컨셉을 더 짧게");
+  });
+});
+
 describe("runQualityLoop — 여러 비평가 합성", () => {
   it("모든 비평가가 통과해야 통과다", async () => {
     const provider = fakeProvider(["카피"]);

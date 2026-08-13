@@ -19,6 +19,18 @@ const MAX_TOKENS = 1500;
  * 길이·개수 제약은 이 스키마로 강제되지 않으므로(minLength/minItems≥2 미지원)
  * parseVoice 와 voice-lint 가 이중으로 검증한다.
  */
+function pointSchema(): Record<string, unknown> {
+  return {
+    type: "object",
+    properties: {
+      title: { type: "string", description: "24자 이내" },
+      bodyHtml: { type: "string", description: "<p>...</p> 1개" },
+    },
+    required: ["title", "bodyHtml"],
+    additionalProperties: false,
+  };
+}
+
 export const VOICE_SCHEMA: Record<string, unknown> = {
   type: "object",
   properties: {
@@ -35,18 +47,18 @@ export const VOICE_SCHEMA: Record<string, unknown> = {
       type: "string",
       description: "컨셉·제작 스토리 <p>...</p> 1~3개. 어떻게 만들어졌는지에 무게를 둔다.",
     },
+    // 배열 minItems 는 0·1 만 지원해서 "2개 이상"을 스키마로 못 박는다.
+    // 그래서 배열 대신 required 속성 두 개 + 선택 속성 하나로 개수를 구조적으로 보장한다.
     points: {
-      type: "array",
-      description: "핵심 포인트 2~3개",
-      items: {
-        type: "object",
-        properties: {
-          title: { type: "string", description: "24자 이내" },
-          bodyHtml: { type: "string", description: "<p>...</p> 1개" },
-        },
-        required: ["title", "bodyHtml"],
-        additionalProperties: false,
+      type: "object",
+      description: "핵심 포인트. first·second 는 필수, third 는 선택.",
+      properties: {
+        first: pointSchema(),
+        second: pointSchema(),
+        third: pointSchema(),
       },
+      required: ["first", "second"],
+      additionalProperties: false,
     },
     closingHtml: {
       type: "string",
@@ -201,28 +213,37 @@ function parseVoice(text: string): VoiceCopy {
     typeof obj !== "object" ||
     obj === null ||
     typeof (obj as Record<string, unknown>).heroCaption !== "string" ||
-    typeof (obj as Record<string, unknown>).conceptHtml !== "string" ||
-    !Array.isArray((obj as Record<string, unknown>).points)
+    typeof (obj as Record<string, unknown>).conceptHtml !== "string"
   ) {
     throw new Error("LLM 출력이 VoiceCopy 스키마와 불일치");
   }
   const o = obj as {
     heroCaption: string;
     conceptHtml: string;
-    points: unknown[];
+    points: unknown;
     problemHtml?: unknown;
     closingHtml?: unknown;
   };
-  const points = o.points
-    .filter(
-      (p): p is { title: string; bodyHtml: string } =>
-        typeof p === "object" &&
-        p !== null &&
-        typeof (p as Record<string, unknown>).title === "string" &&
-        typeof (p as Record<string, unknown>).bodyHtml === "string"
-    )
-    .slice(0, 3);
-  // Structured Outputs 는 minItems 2 를 지원하지 않으므로 개수는 여기서 지킨다.
+
+  // points 는 스키마상 {first, second, third?} 객체지만, v1 초안이나 스텁이 만든
+  // 배열 형태도 그대로 읽을 수 있게 둘 다 받는다.
+  const isPoint = (p: unknown): p is { title: string; bodyHtml: string } =>
+    typeof p === "object" &&
+    p !== null &&
+    typeof (p as Record<string, unknown>).title === "string" &&
+    typeof (p as Record<string, unknown>).bodyHtml === "string";
+
+  const rawPoints: unknown[] = Array.isArray(o.points)
+    ? o.points
+    : typeof o.points === "object" && o.points !== null
+      ? [
+          (o.points as Record<string, unknown>).first,
+          (o.points as Record<string, unknown>).second,
+          (o.points as Record<string, unknown>).third,
+        ]
+      : [];
+
+  const points = rawPoints.filter(isPoint).slice(0, 3);
   if (points.length < 2) {
     throw new Error("LLM 출력 points 가 2개 미만");
   }

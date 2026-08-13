@@ -73,6 +73,7 @@ export async function generateDraftForProduct(
     maxAttempts: options.skipQualityLoop ? 1 : MAX_QUALITY_ATTEMPTS,
     stopWhenNoImprovement: true,
     operatorFeedback: options.feedback ?? null,
+    initialPreviousVoice: previousVoice,
   });
 
   const assembled = assembleBlocks({ facts, imageUrls, voice: loop.voice });

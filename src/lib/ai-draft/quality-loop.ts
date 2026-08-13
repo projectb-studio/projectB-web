@@ -57,6 +57,11 @@ export interface QualityLoopInput {
   stopWhenNoImprovement?: boolean;
   /** 운영자 반려 의견 — 첫 시도부터 반영한다. */
   operatorFeedback?: string | null;
+  /**
+   * 반려된 직전 초안의 보이스. 전면 재작성이 아니라 수정 기반 재생성이 되도록
+   * 첫 시도부터 모델에 넘긴다.
+   */
+  initialPreviousVoice?: VoiceCopy | null;
 }
 
 export interface QualityLoopResult {
@@ -124,6 +129,7 @@ export async function runQualityLoop(
     maxAttempts,
     stopWhenNoImprovement = false,
     operatorFeedback = null,
+    initialPreviousVoice = null,
   } = input;
 
   const history: AttemptRecord[] = [];
@@ -131,7 +137,7 @@ export async function runQualityLoop(
     null;
   let stoppedEarly = false;
   let generationError: string | undefined;
-  let previousVoice: VoiceCopy | null = null;
+  let previousVoice: VoiceCopy | null = initialPreviousVoice;
   let carriedFeedback: string | null = operatorFeedback;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
