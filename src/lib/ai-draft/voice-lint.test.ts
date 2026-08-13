@@ -137,6 +137,35 @@ describe("lintVoice — 사실 침범 (환각 격리의 핵심)", () => {
     expect(codes(r)).toContain("fact-leak");
   });
 
+  it("입력에 없는 제작 기법을 지어내면 잡는다", () => {
+    // 실제 평가에서 나온 실패: 입력에 없는 "손바느질"을 카피가 단정했다.
+    const r = lintVoice(
+      voice({ conceptHtml: "<p>손으로 바느질해 패널을 잇습니다. 자국이 남습니다.</p>" }),
+      facts
+    );
+    expect(codes(r)).toContain("fact-leak");
+  });
+
+  it("핸드메이드 태그가 개별 기법까지 보증하지는 않는다", () => {
+    const r = lintVoice(
+      voice({ conceptHtml: "<p>물레로 성형해 가마에서 구워냈습니다. 오래 씁니다.</p>" }),
+      { ...facts, description: null, details: null, care: null }
+    );
+    expect(codes(r)).toContain("fact-leak");
+  });
+
+  it("입력에 적힌 기법은 인용해도 된다", () => {
+    const withProcess = {
+      ...facts,
+      description: "물레로 하나씩 성형한 뒤 유약을 입혀 구워낸 화병입니다.",
+    };
+    const r = lintVoice(
+      voice({ conceptHtml: "<p>물레로 성형해 하나씩 만듭니다. 형태가 조금씩 다릅니다.</p>" }),
+      withProcess
+    );
+    expect(codes(r)).not.toContain("fact-leak");
+  });
+
   it("가격을 카피에 넣으면 잡는다", () => {
     const r = lintVoice(
       voice({ heroCaption: "38,000원의 가치" }),

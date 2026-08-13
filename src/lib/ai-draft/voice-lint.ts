@@ -90,6 +90,23 @@ const CARE_CLAIM_TERMS = [
   "항균",
 ];
 
+/**
+ * 제작 공정·기법 주장. 소재나 치수만큼이나 검증 가능한 **사실**인데 v1 린터가
+ * 놓쳤던 구멍이다. 핸드메이드 상품에서 "손바느질", "물레로 성형" 같은 기법은
+ * 브랜드의 핵심 주장이므로, 근거 없이 지어내면 소비자를 오인하게 만든다.
+ *
+ * 태그(handmade)는 "수작업"까지만 보증하고 개별 기법은 보증하지 않는다.
+ */
+const PROCESS_CLAIM_TERMS = [
+  "바느질", "재봉", "봉제", "박음질", "스티치",
+  "깎아", "깎은", "깎는", "조각", "대패",
+  "용접", "납땜", "주조", "단조",
+  "물레", "성형", "유약", "가마", "소성", "구워", "구운",
+  "블로잉", "불어", "핸드블로잉",
+  "엮어", "엮은", "짜고", "짠", "직조", "위빙",
+  "염색", "무두질", "워싱 가공", "코팅",
+];
+
 /** 입력에 근거가 없으면 지어낸 것으로 보는 소재명. */
 const MATERIAL_TERMS = [
   "리넨",
@@ -284,6 +301,20 @@ function checkFactLeak(slots: SlotText[], facts: ProductFacts): Violation[] {
           slot,
           evidence: term,
           message: `입력 사실값에 근거가 없는 "${term}" 를 카피가 단정했습니다.`,
+        });
+      }
+    }
+
+    for (const term of PROCESS_CLAIM_TERMS) {
+      if (lower.includes(term.toLowerCase()) && !corpus.includes(term.toLowerCase())) {
+        out.push({
+          rule: "fact-leak",
+          severity: "blocker",
+          slot,
+          evidence: term,
+          message:
+            `입력에 없는 제작 기법 "${term}" 를 카피가 단정했습니다. ` +
+            `제작 방식도 사실이므로, 운영자가 적어준 것만 쓸 수 있습니다.`,
         });
       }
     }
