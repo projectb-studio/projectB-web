@@ -124,8 +124,12 @@ const EXAGGERATION_TERMS = [
 ];
 
 // 이모지 — 기호/픽토그램 영역. (문장부호·한글은 제외)
-const EMOJI_RE =
-  /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu;
+// tsconfig 에 target 이 없어 ES5 로 잡히므로 u 플래그 대신 서러게이트 페어로 표현한다.
+const EMOJI_RE = new RegExp(
+  "[\\u2600-\\u27BF\\uFE0F\\u2190-\\u21FF\\u2B00-\\u2BFF]" +
+    "|[\\uD83C-\\uD83E][\\uDC00-\\uDFFF]",
+  "g"
+);
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
