@@ -42,3 +42,6 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+
+# AI API 사용량 원장 (로컬 전용)
+.ai-draft-usage.json

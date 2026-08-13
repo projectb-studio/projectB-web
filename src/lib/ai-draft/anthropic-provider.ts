@@ -1,16 +1,18 @@
 import type { DraftProvider, GenerateInput, GenerateOutput } from "@/lib/ai-draft/provider";
 import type { VoiceCopy } from "@/lib/ai-draft/recipe";
+import { callAnthropic } from "@/lib/ai-draft/anthropic-client";
 
 /**
- * 실제 LLM Provider (Anthropic Messages API, fetch 기반 — 새 의존성 없음).
+ * 실제 LLM Provider (Anthropic Messages API).
  *
  * 환경변수 ANTHROPIC_API_KEY 가 있을 때만 팩토리가 이 Provider 를 선택한다.
  * 모델은 "보이스 카피"만 생성하며, 사실값·이미지·레이아웃은 레시피가 통제한다.
  * 출력은 엄격한 JSON 스키마로 강제하고, 파싱 실패 시 throw 한다(환각 격리).
+ * 실제 호출은 비용 가드가 걸린 공용 클라이언트를 통해서만 나간다.
  */
 // 카피 생성은 경량 작업 → 비용·품질 균형상 Haiku 가 기본값. AI_DRAFT_MODEL 로 오버라이드.
 const MODEL = process.env.AI_DRAFT_MODEL ?? "claude-haiku-4-5-20251001";
-const API_URL = "https://api.anthropic.com/v1/messages";
+const MAX_TOKENS = 1500;
 
 const SYSTEM_PROMPT = `당신은 한국 핸드메이드 소품 쇼핑몰의 상세페이지 카피라이터다.
 브랜드 톤: 산업적 미니멀 — 과장·이모지·느낌표 남발 금지, 절제되고 단정한 문장.
@@ -30,11 +32,6 @@ const SYSTEM_PROMPT = `당신은 한국 핸드메이드 소품 쇼핑몰의 상�
 - 가격·할인·재고·배송일 같은 수치도 만들지 마라.
 - 오직 분위기·컨셉·감성 카피만 작성한다.`;
 
-interface AnthropicResponse {
-  content?: Array<{ type: string; text?: string }>;
-  usage?: { input_tokens?: number; output_tokens?: number };
-}
-
 export class AnthropicDraftProvider implements DraftProvider {
   constructor(private readonly apiKey: string) {}
 
@@ -52,36 +49,25 @@ export class AnthropicDraftProvider implements DraftProvider {
       "위 정보를 바탕으로 스키마에 맞는 JSON 카피를 작성하라.",
     ].filter(Boolean);
 
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": this.apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
+    const res = await callAnthropic(
+      {
         model: MODEL,
-        max_tokens: 1500,
         system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userParts.join("\n") }],
-      }),
-    });
+        user: userParts.join("\n"),
+        maxTokens: MAX_TOKENS,
+        label: "draft:generate",
+      },
+      { apiKey: this.apiKey }
+    );
 
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      throw new Error(`Anthropic API error ${res.status}: ${detail.slice(0, 300)}`);
-    }
-
-    const json = (await res.json()) as AnthropicResponse;
-    const text = json.content?.find((c) => c.type === "text")?.text ?? "";
-    const voice = parseVoice(text);
+    const voice = parseVoice(res.text);
 
     return {
       voice,
       generator: `anthropic:${MODEL}`,
       rawMeta: {
-        inputTokens: json.usage?.input_tokens,
-        outputTokens: json.usage?.output_tokens,
+        inputTokens: res.inputTokens,
+        outputTokens: res.outputTokens,
         appliedFeedback: feedback?.trim() ? true : false,
       },
     };
