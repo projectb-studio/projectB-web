@@ -124,6 +124,38 @@ describe("callAnthropic", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
+  it("jsonSchema 를 주면 Structured Outputs 형식으로 실어 보낸다", async () => {
+    const fetchImpl = vi.fn(async () => okResponse("{}"));
+    const schema = {
+      type: "object",
+      properties: { a: { type: "string" } },
+      required: ["a"],
+      additionalProperties: false,
+    };
+
+    await callAnthropic(
+      { ...baseInput, jsonSchema: schema },
+      { apiKey: "k", guard, fetchImpl }
+    );
+
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as {
+      output_config?: { format?: { type?: string; schema?: unknown } };
+    };
+    expect(body.output_config?.format?.type).toBe("json_schema");
+    expect(body.output_config?.format?.schema).toEqual(schema);
+  });
+
+  it("jsonSchema 가 없으면 output_config 를 붙이지 않는다", async () => {
+    const fetchImpl = vi.fn(async () => okResponse("ok"));
+
+    await callAnthropic(baseInput, { apiKey: "k", guard, fetchImpl });
+
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body.output_config).toBeUndefined();
+  });
+
   it("Anthropic 인증 헤더와 모델·max_tokens 를 규격대로 보낸다", async () => {
     const fetchImpl = vi.fn(async () => okResponse("ok"));
 

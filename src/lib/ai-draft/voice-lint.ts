@@ -40,6 +40,10 @@ export const LINT_RULES: Record<string, LintRule> = {
     severity: "minor",
     description: "제목·문구가 중복되어 정보량이 낮음",
   },
+  cliche: {
+    severity: "major",
+    description: "어느 상품에나 붙는 상투어라 상품 고유성이 없음 (전형적 AI 티)",
+  },
 };
 
 const SEVERITY_PENALTY: Record<Severity, number> = {
@@ -106,6 +110,29 @@ const MATERIAL_TERMS = [
   "대리석",
   "라탄",
   "펠트",
+];
+
+/**
+ * 어느 상품에 붙여도 말이 되는 상투어. AI 카피가 가장 자주 무너지는 지점이라
+ * 실무 리뷰에서 반복적으로 지적된 표현들이다. 여기 걸리면 "이 상품만의 말"로
+ * 바꿔야 한다.
+ */
+const CLICHE_PHRASES = [
+  "일상 속",
+  "일상에",
+  "고민 없이",
+  "어디에나 어울리는",
+  "어디에도 어울리는",
+  "특별한 순간",
+  "당신의 공간",
+  "당신의 일상",
+  "누구나 좋아하는",
+  "부담 없이",
+  "센스 있는",
+  "감각적인",
+  "포인트가 되어",
+  "공간을 완성",
+  "매력을 더해",
 ];
 
 const EXAGGERATION_TERMS = [
@@ -368,6 +395,24 @@ function checkHtmlShape(slots: SlotText[]): Violation[] {
     }));
 }
 
+function checkCliche(slots: SlotText[]): Violation[] {
+  const out: Violation[] = [];
+  for (const { slot, text } of slots) {
+    for (const phrase of CLICHE_PHRASES) {
+      if (text.includes(phrase)) {
+        out.push({
+          rule: "cliche",
+          severity: "major",
+          slot,
+          evidence: phrase,
+          message: `"${phrase}" 는 어느 상품에나 붙는 상투어입니다. 이 상품에만 해당하는 구체적 표현으로 바꾸세요.`,
+        });
+      }
+    }
+  }
+  return out;
+}
+
 function checkRepetition(voice: VoiceCopy, facts: ProductFacts): Violation[] {
   const out: Violation[] = [];
 
@@ -406,6 +451,7 @@ export function lintVoice(voice: VoiceCopy, facts: ProductFacts): LintResult {
     ...checkTone(slots),
     ...checkLength(voice, slots),
     ...checkHtmlShape(slots),
+    ...checkCliche(slots),
     ...checkRepetition(voice, facts),
   ];
 

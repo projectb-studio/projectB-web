@@ -199,6 +199,32 @@ describe("lintVoice — 형식", () => {
   });
 });
 
+describe("lintVoice — 상투어", () => {
+  it("어느 상품에나 붙는 상투어를 잡는다", () => {
+    const r = lintVoice(
+      voice({ conceptHtml: "<p>일상 속 어디에나 어울리는 아이템입니다. 오래 씁니다.</p>" }),
+      facts
+    );
+    expect(codes(r)).toContain("cliche");
+  });
+
+  it("상투어 위반은 문제 표현을 근거로 남긴다", () => {
+    const r = lintVoice(voice({ heroCaption: "고민 없이 놓는 자리" }), facts);
+    const v = r.violations.find((x) => x.rule === "cliche");
+    expect(v?.evidence).toBe("고민 없이");
+  });
+
+  it("구체적인 표현은 상투어로 보지 않는다", () => {
+    const r = lintVoice(
+      voice({
+        conceptHtml: "<p>물레 자국이 남은 표면이 빛을 고르게 흩뜨립니다. 오래 두고 씁니다.</p>",
+      }),
+      facts
+    );
+    expect(codes(r)).not.toContain("cliche");
+  });
+});
+
 describe("lintVoice — 반복", () => {
   it("포인트 제목이 중복되면 잡는다", () => {
     const r = lintVoice(

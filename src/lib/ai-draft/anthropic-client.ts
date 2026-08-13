@@ -22,6 +22,12 @@ export interface AnthropicCallInput {
   /** 원장에 남길 호출 용도. 예: 'draft:generate' | 'draft:critique' */
   label: string;
   temperature?: number;
+  /**
+   * Structured Outputs 스키마. 주면 제약 디코딩이 걸려 스키마 위반 출력 자체가
+   * 생기지 않는다. 단 minLength/maxLength·minItems(2 이상) 같은 제약은 지원되지
+   * 않으므로, 길이·개수 규칙은 별도 코드 검증으로 이중 확인해야 한다.
+   */
+  jsonSchema?: Record<string, unknown>;
 }
 
 export interface AnthropicCallResult {
@@ -74,6 +80,13 @@ export async function callAnthropic(
         system: input.system,
         messages: [{ role: "user", content: input.user }],
         ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
+        ...(input.jsonSchema
+          ? {
+              output_config: {
+                format: { type: "json_schema", schema: input.jsonSchema },
+              },
+            }
+          : {}),
       }),
     });
   } catch (e) {
