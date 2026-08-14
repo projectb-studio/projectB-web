@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, formatDateISO } from "@/lib/utils";
 
 interface Review {
   id: string;
@@ -103,7 +103,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
                     {review.author}
                   </span>
                   <span className="text-xs text-[var(--pb-silver)]">
-                    {review.date}
+                    {formatDateISO(review.date)}
                   </span>
                 </div>
                 <p className="text-sm text-[var(--pb-charcoal)] leading-relaxed">

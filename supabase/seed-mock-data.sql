@@ -61,13 +61,16 @@ INSERT INTO pb_order_items (order_id, product_id, product_name, quantity, price)
 -- ============================================
 -- 리뷰 6건 (다양한 별점)
 -- ============================================
+-- 작성 시각을 건마다 다르게 둔다. NOW() - INTERVAL 'N days' 만 쓰면 전 건의
+-- 시·분·초가 시드를 돌린 순간으로 똑같이 박혀 한눈에 가짜 데이터로 보인다.
+-- 작성자도 로그인 사용자 1명 + 비회원 5명으로 실제 분포에 가깝게 둔다.
 INSERT INTO pb_reviews (product_id, user_id, author_name, rating, content, is_published, created_at) VALUES
-(v_product_ids[1], v_user_id, '고은석', 5, '정말 퀄리티가 좋아요. 무광 블랙 색감이 사진 그대로예요. 인테리어 소품으로 딱입니다!', true, NOW() - INTERVAL '70 days'),
-(v_product_ids[2], v_user_id, '고은석', 4, '린넨 질감이 좋고 아이보리 색상도 깔끔해요. 세탁법이 좀 까다롭긴 합니다.', true, NOW() - INTERVAL '55 days'),
-(v_product_ids[3], NULL, '테스트 고객A', 5, '캔들 홀더 세트 선물용으로 샀는데 포장도 예쁘고 만족합니다.', true, NOW() - INTERVAL '40 days'),
-(v_product_ids[1], NULL, '테스트 고객B', 3, '화병 자체는 예쁜데 생각보다 작아요. 사이즈 참고하세요.', true, NOW() - INTERVAL '25 days'),
-(v_product_ids[4], NULL, '테스트 고객C', 5, '우드 트레이 퀄리티 최고! 재구매 의사 있습니다.', true, NOW() - INTERVAL '10 days'),
-(v_product_ids[5], v_user_id, '고은석', 4, '코스터 두께감이 적당하고 흡수력도 좋아요.', true, NOW() - INTERVAL '5 days');
+(v_product_ids[1], NULL, '박서연', 5, '정말 퀄리티가 좋아요. 무광 블랙 색감이 사진 그대로예요. 인테리어 소품으로 딱입니다!', true, date_trunc('day', NOW() - INTERVAL '70 days') + INTERVAL '21 hours 14 minutes'),
+(v_product_ids[2], NULL, '김도현', 4, '린넨 질감이 좋고 아이보리 색상도 깔끔해요. 세탁법이 좀 까다롭긴 합니다.', true, date_trunc('day', NOW() - INTERVAL '55 days') + INTERVAL '9 hours 37 minutes'),
+(v_product_ids[3], NULL, '이수민', 5, '캔들 홀더 세트 선물용으로 샀는데 포장도 예쁘고 만족합니다.', true, date_trunc('day', NOW() - INTERVAL '40 days') + INTERVAL '13 hours 52 minutes'),
+(v_product_ids[1], NULL, '정하늘', 3, '화병 자체는 예쁜데 생각보다 작아요. 사이즈 참고하세요.', true, date_trunc('day', NOW() - INTERVAL '25 days') + INTERVAL '18 hours 5 minutes'),
+(v_product_ids[4], NULL, '최민재', 5, '우드 트레이 퀄리티 최고! 재구매 의사 있습니다.', true, date_trunc('day', NOW() - INTERVAL '10 days') + INTERVAL '11 hours 26 minutes'),
+(v_product_ids[5], v_user_id, '고은석', 4, '코스터 두께감이 적당하고 흡수력도 좋아요.', true, date_trunc('day', NOW() - INTERVAL '5 days') + INTERVAL '22 hours 48 minutes');
 
 -- ============================================
 -- CS 문의 4건
