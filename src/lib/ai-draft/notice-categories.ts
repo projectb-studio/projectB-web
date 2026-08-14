@@ -86,10 +86,22 @@ export const NOTICE_CATEGORIES: Record<string, NoticeCategory> = {
   etc: ETC,
 };
 
-/** 주방 기물로 읽히는 상품명 키워드. */
+/**
+ * 주방 기물로 읽히는 상품명 키워드.
+ *
+ * 영문도 함께 본다 — 현재 등록 상품 다수가 영문명이라 한글 키워드만으로는
+ * 트레이·도마·보울이 전부 기타재화로 빠진다. 기타재화는 필수항목이 더 적어서
+ * 오분류가 곧 표시의무 누락이 되는, 위험한 방향의 실수다.
+ */
 const KITCHEN_NAME_HINTS = [
+  // 한글
   "컵", "잔", "머그", "트레이", "도마", "그릇", "보울", "볼", "접시",
   "카라페", "저그", "커트러리", "수저", "포크", "티팟", "주전자", "핀치볼",
+  // 영문. "dish"·"board" 처럼 넓은 낱말은 쓰지 않는다 —
+  // soap dish(욕실용품)까지 주방용품으로 끌어와 불필요한 표시항목을 요구하게 된다.
+  "cup", "mug", "glassware", "tray", "cutting board", "bowl",
+  "plate", "carafe", "jug", "pitcher", "teapot", "kettle",
+  "cutlery", "spoon", "fork", "coaster",
 ];
 
 /**

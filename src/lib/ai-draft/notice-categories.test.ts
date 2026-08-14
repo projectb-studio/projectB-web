@@ -38,6 +38,28 @@ describe("resolveNoticeCategory", () => {
     );
   });
 
+  it("영문 상품명도 주방용품으로 알아본다", () => {
+    // 현재 등록 상품 다수가 영문명이다. 한글 키워드만 보면 트레이·도마가
+    // 필수항목이 더 적은 기타재화로 빠져 표시의무를 덜 하게 된다.
+    expect(
+      resolveNoticeCategory(facts({ name: "Oak wood tray — natural", tag: "wood" })).code
+    ).toBe("kitchen");
+    expect(
+      resolveNoticeCategory(facts({ name: "Walnut cutting board — small", tag: "wood" }))
+        .code
+    ).toBe("kitchen");
+    expect(
+      resolveNoticeCategory(facts({ name: "Clay pinch bowl set (3p)", tag: "handmade" }))
+        .code
+    ).toBe("kitchen");
+  });
+
+  it("욕실용품을 주방용품으로 끌어오지 않는다", () => {
+    expect(
+      resolveNoticeCategory(facts({ name: "Marble soap dish", tag: "stone" })).code
+    ).toBe("etc");
+  });
+
   it("판단 근거가 없으면 고시가 정한 폴백인 기타 재화를 쓴다", () => {
     expect(resolveNoticeCategory(facts({ name: "황동 캔들홀더", tag: "metal" })).code).toBe(
       "etc"
@@ -114,6 +136,58 @@ describe("noticeRowsFor", () => {
         expect(r.value.length).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+/**
+ * 운영자가 코드 수정 없이 관리자 화면의 details 칸에 붙여넣는 것만으로
+ * 사업자 공통 항목이 채워지는지 검증한다. 이 블록이 깨지면 가이드 문서도 틀린 게 된다.
+ */
+const BUSINESS_INFO_BLOCK = [
+  "제조자: 프로젝트비",
+  "제조국: 대한민국",
+  "A/S: 프로젝트비 010-2122-0691",
+  "품질보증기준: 소비자기본법에 따른 소비자분쟁해결기준에 따름",
+  "인증: 해당 없음",
+].join("\n");
+
+describe("사업자 공통정보 붙여넣기", () => {
+  it("기타재화는 이 블록만으로 법정 항목이 전부 채워진다", () => {
+    const rows = noticeRowsFor(
+      facts({ name: "황동 캔들홀더", tag: "metal", details: BUSINESS_INFO_BLOCK })
+    );
+    const gaps = rows.filter((r) => r.value === "[운영자 입력 필요]");
+    expect(gaps).toEqual([]);
+  });
+
+  it("주방용품·침구류는 상품 고유 스펙만 남는다 (사업자 항목은 해결됨)", () => {
+    for (const tag of ["glass", "fabric"]) {
+      const rows = noticeRowsFor(
+        facts({ name: "핸드블로운 글라스 컵", tag, details: BUSINESS_INFO_BLOCK })
+      );
+      const gapLabels = rows
+        .filter((r) => r.value === "[운영자 입력 필요]")
+        .map((r) => r.label);
+
+      // 사업자 공통 항목은 더 이상 비어 있지 않다.
+      expect(gapLabels.some((l) => l.includes("제조자"))).toBe(false);
+      expect(gapLabels.some((l) => l.includes("제조국"))).toBe(false);
+      expect(gapLabels.some((l) => l.includes("A/S"))).toBe(false);
+      expect(gapLabels.some((l) => l.includes("품질보증"))).toBe(false);
+    }
+  });
+
+  it("상품 고유 스펙까지 더하면 전부 채워진다", () => {
+    const rows = noticeRowsFor(
+      facts({
+        name: "핸드블로운 글라스 컵",
+        tag: "glass",
+        details:
+          BUSINESS_INFO_BLOCK +
+          "\n재질: 보로실리케이트 유리\n구성품: 컵 1개\n크기: 지름 8cm × 높이 10cm\n출시년월: 2026-08",
+      })
+    );
+    expect(rows.filter((r) => r.value === "[운영자 입력 필요]")).toEqual([]);
   });
 });
 
