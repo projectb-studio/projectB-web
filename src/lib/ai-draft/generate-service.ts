@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getDraftProvider } from "@/lib/ai-draft";
 import { assembleBlocks, type ProductFacts, type VoiceCopy } from "@/lib/ai-draft/recipe";
 import { createDraft } from "@/lib/data/drafts";
+import { runQualityLoop, type QualityCritic } from "@/lib/ai-draft/quality-loop";
+import { buildCritics, MAX_QUALITY_ATTEMPTS } from "@/lib/ai-draft/critics";
 import type { DbProductDetailDraft } from "@/types/database";
 
 /**
@@ -17,6 +19,10 @@ export interface GenerateDraftOptions {
   feedback?: string | null;
   /** 재생성의 부모 초안 (리비전 체인 + 직전 보이스 복원) */
   parent?: DbProductDetailDraft | null;
+  /** 품질 루프를 끄고 1회만 생성 (테스트·디버깅용) */
+  skipQualityLoop?: boolean;
+  /** 비평가 주입 (테스트용) */
+  critics?: QualityCritic[];
 }
 
 export async function generateDraftForProduct(
@@ -57,24 +63,45 @@ export async function generateDraftForProduct(
     (parent?.generation_meta as { voice?: VoiceCopy } | undefined)?.voice ?? null;
 
   const provider = getDraftProvider();
-  const output = await provider.generate({
+
+  // 품질 루프를 태운다 — 미달이면 비평 피드백을 붙여 재생성하고, 나아지지 않으면
+  // 남은 시도를 쓰지 않는다. 어떤 경우에도 카피는 나오고, 판정 이력이 함께 남는다.
+  const loop = await runQualityLoop({
     facts,
-    feedback: options.feedback ?? null,
-    previousVoice,
+    provider,
+    critics: options.critics ?? buildCritics(),
+    maxAttempts: options.skipQualityLoop ? 1 : MAX_QUALITY_ATTEMPTS,
+    stopWhenNoImprovement: true,
+    operatorFeedback: options.feedback ?? null,
+    initialPreviousVoice: previousVoice,
   });
 
-  const assembled = assembleBlocks({ facts, imageUrls, voice: output.voice });
+  const assembled = assembleBlocks({ facts, imageUrls, voice: loop.voice });
 
   return createDraft({
     productId,
     blocks: assembled.blocks,
     source: "ai",
-    generator: output.generator,
+    generator: loop.generator,
     generationMeta: {
       recipe: assembled.meta,
-      voice: output.voice,
-      raw: output.rawMeta ?? {},
+      voice: loop.voice,
+      raw: loop.rawMeta ?? {},
       feedback: options.feedback ?? null,
+      // 검수 화면이 "이 초안이 몇 점인지"를 보여줄 수 있도록 남긴다.
+      quality: {
+        passed: loop.passed,
+        score: loop.bestScore,
+        attempts: loop.attempts,
+        stoppedEarly: loop.stoppedEarly,
+        generationError: loop.generationError ?? null,
+        history: loop.history.map((h) => ({
+          attempt: h.attempt,
+          score: h.score,
+          passed: h.passed,
+          verdicts: h.verdicts,
+        })),
+      },
     },
     parentDraftId: parent?.id ?? null,
     revision: parent ? parent.revision + 1 : 1,

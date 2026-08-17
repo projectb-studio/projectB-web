@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { getReviews } from "@/lib/data/reviews";
-import { formatDate } from "@/lib/utils";
+import { formatDateISO } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Photo Reviews",
@@ -62,7 +62,7 @@ export default async function ReviewsPage() {
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <Stars rating={review.rating} />
-                <span className="text-[10px] text-pb-silver">{formatDate(review.date)}</span>
+                <span className="text-[10px] text-pb-silver">{formatDateISO(review.date)}</span>
               </div>
               <Link
                 href={`/product/${review.productSlug}`}

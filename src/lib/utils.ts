@@ -28,6 +28,19 @@ export function formatDate(date: string | Date): string {
 }
 
 /**
+ * Format date as YYYY-MM-DD.
+ *
+ * Used where a compact date reads better than the long Korean form — review
+ * bylines, admin tables. Local time, so the date matches what the user sees
+ * on their own clock rather than UTC.
+ */
+export function formatDateISO(date: string | Date): string {
+  const d = new Date(date);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
  * Truncate text with ellipsis.
  */
 export function truncate(text: string, maxLength: number): string {

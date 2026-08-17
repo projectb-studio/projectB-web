@@ -44,12 +44,22 @@ export default async function DraftReviewPage({
   const product = data as { name: string; detail_blocks: unknown } | null;
   if (!product) notFound();
 
-  const factsNeedingInput =
-    (
-      draft.generation_meta as
-        | { recipe?: { factsNeedingInput?: string[] } }
-        | undefined
-    )?.recipe?.factsNeedingInput ?? [];
+  const meta = draft.generation_meta as
+    | {
+        recipe?: { factsNeedingInput?: string[]; legalGaps?: string[] };
+        quality?: { score?: number; passed?: boolean; attempts?: number };
+      }
+    | undefined;
+
+  const factsNeedingInput = meta?.recipe?.factsNeedingInput ?? [];
+  const legalGaps = meta?.recipe?.legalGaps ?? [];
+  const quality = meta?.quality
+    ? {
+        score: meta.quality.score ?? 0,
+        passed: meta.quality.passed ?? false,
+        attempts: meta.quality.attempts ?? 1,
+      }
+    : null;
 
   return (
     <DraftReviewShell
@@ -62,6 +72,8 @@ export default async function DraftReviewPage({
       revision={draft.revision}
       feedback={draft.feedback}
       factsNeedingInput={factsNeedingInput}
+      legalGaps={legalGaps}
+      quality={quality}
     />
   );
 }

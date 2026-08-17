@@ -6,6 +6,7 @@ import {
   publishToProduct,
 } from "@/lib/data/drafts";
 import { sanitizeBlocks } from "@/lib/detail-blocks/sanitize-blocks";
+import { assertPublishable, PlaceholderError } from "@/lib/detail-blocks/publish-gate";
 
 export const revalidate = 0;
 
@@ -36,7 +37,15 @@ export async function POST(
   try {
     // 발행 경계 재검증 — AI 산출물도 동일 신뢰 경계를 통과해야 한다.
     safeBlocks = sanitizeBlocks(draft.blocks);
+    // 채우지 않은 법정 항목이 남아 있으면 발행하지 않는다 (고시 일반원칙 3).
+    assertPublishable(safeBlocks);
   } catch (e) {
+    if (e instanceof PlaceholderError) {
+      return NextResponse.json(
+        { error: e.message, placeholders: e.placeholders },
+        { status: 422 }
+      );
+    }
     return NextResponse.json(
       { error: `발행 검증 실패: ${(e as Error).message}` },
       { status: 422 }

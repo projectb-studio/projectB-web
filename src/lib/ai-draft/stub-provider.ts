@@ -70,6 +70,10 @@ export class StubDraftProvider implements DraftProvider {
         heroCaption,
         conceptHtml: conceptParas.join(""),
         points: finalPoints,
+        problemHtml:
+          `<p>${escapeHtml(label)}을(를) 고를 때 무엇을 봐야 할지 막막할 수 있습니다.</p>` +
+          `<p>${escapeHtml(facts.name)}은(는) 손이 닿는 자리부터 다듬어 그 고민을 줄입니다.</p>`,
+        closingHtml: `<p>오래 두고 쓰기를 전제로 만든 ${escapeHtml(label)}입니다.</p>`,
       },
       generator: "stub",
       rawMeta: {

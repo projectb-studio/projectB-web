@@ -127,7 +127,7 @@ describe("assembleBlocks", () => {
 
   it("records recipe version + slot fill provenance in meta", () => {
     const { meta } = assembleBlocks({ facts: BASE_FACTS, imageUrls: [IMG(0)], voice: VOICE });
-    expect(meta.recipeVersion).toBe("soft-goods-editorial-v1");
+    expect(meta.recipeVersion).toBe("soft-goods-editorial-v2");
     expect(meta.slots.find((s) => s.slot === "hero")?.filledWith).toContain("product-image");
   });
 });

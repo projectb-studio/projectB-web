@@ -1,6 +1,12 @@
 import type { Block } from "@/lib/detail-blocks/schema";
 import { BlocksSchema } from "@/lib/detail-blocks/schema";
 import { sanitizeRichText } from "@/lib/detail-blocks/sanitize";
+import {
+  noticeRowsFor,
+  resolveNoticeCategory,
+  TRADE_TERMS_SECTIONS,
+  NOTICE_PLACEHOLDER,
+} from "@/lib/ai-draft/notice-categories";
 
 /**
  * 상세페이지 레시피 — "소품 에디토리얼 v1"
@@ -16,20 +22,35 @@ import { sanitizeRichText } from "@/lib/detail-blocks/sanitize";
  * 따라서 stub 든 LLM 이든 동일한 슬롯 구조를 채우고, 운영자 검수는
  * "레이아웃 고치기"가 아니라 "카피 사실 검증 + 빈 사실값 채우기"로 좁혀진다.
  */
-export const RECIPE_VERSION = "soft-goods-editorial-v1";
+export const RECIPE_VERSION = "soft-goods-editorial-v2";
 
 /** 사실값이 비어 있을 때 운영자 입력을 유도하는 플레이스홀더 */
-export const FACT_PLACEHOLDER = "[운영자 입력 필요]";
+export const FACT_PLACEHOLDER = NOTICE_PLACEHOLDER;
 
-const DEFAULT_SHIPPING_TEXT =
-  "<p>주문 후 영업일 기준 2~3일 내 발송됩니다. ₩50,000 이상 구매 시 무료배송.</p>" +
-  "<p>교환·반품은 수령 후 7일 이내 가능합니다. 단순 변심의 경우 왕복 배송비는 고객 부담입니다.</p>";
+/**
+ * 수작업 특성상 개체차가 있다는 고지. 법정 의무는 아니지만 핸드메이드 CS 의
+ * 최대 분쟁 원인이라 고정 문구로 넣는다. 사실이 아니라 상품 특성 설명이므로
+ * 플레이스홀더가 아니다.
+ */
+const HANDMADE_VARIANCE_TEXT =
+  "<p>하나씩 손으로 만들어 색과 크기, 표면 질감에 약간의 차이가 있을 수 있습니다. " +
+  "이는 불량이 아니라 수작업 제품의 특성입니다.</p>";
 
 /** 모델이 생성하는 보이스 카피 (사실값 제외) */
 export interface VoiceCopy {
-  heroCaption: string; // 한 줄 컨셉
-  conceptHtml: string; // 컨셉·브랜드 스토리 (richtext html)
-  points: Array<{ title: string; bodyHtml: string }>; // 2~3개 핵심 포인트
+  /** 후킹 한 줄 — v2 에서 "컨셉"이 아니라 "고객이 얻는 것"으로 정의를 바꿨다 */
+  heroCaption: string;
+  /** 컨셉·제작 스토리 (richtext html) */
+  conceptHtml: string;
+  /** 2~3개 핵심 포인트 */
+  points: Array<{ title: string; bodyHtml: string }>;
+  /**
+   * 문제 공감 → 해결 (v2 신규). 국내 상세페이지 표준의 핵심 축인데 v1 에 없었다.
+   * v1 초안과의 하위 호환을 위해 선택 필드로 둔다.
+   */
+  problemHtml?: string;
+  /** 클로징 (v2 신규). 긴 상세 하단에서의 이탈을 막는다. */
+  closingHtml?: string;
 }
 
 /** 상품 사실 데이터 (운영자가 입력한 DB 값 = 진실원천) */
@@ -56,8 +77,15 @@ export interface AssembleResult {
   meta: {
     recipeVersion: string;
     slots: Array<{ slot: string; filledWith: string }>;
-    /** 모델이 채우지 못해 운영자 입력이 필요한 사실 필드 */
+    /** 운영자 입력을 권하는 사실 필드 (발행을 막지는 않음) */
     factsNeedingInput: string[];
+    /** 적용된 고시 품목 */
+    noticeCategory: string;
+    /**
+     * 법정 고지 중 값이 비어 있는 항목. 이건 권고가 아니라 **발행 차단 사유**다.
+     * 고시 일반원칙 3 — 정보를 제공할 수 없으면 그 사유를 제시해야 한다.
+     */
+    legalGaps: string[];
   };
 }
 
@@ -121,7 +149,10 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
   const blocks: Block[] = [];
   const slots: Array<{ slot: string; filledWith: string }> = [];
   const factsNeedingInput: string[] = [];
-  const alt = facts.name;
+
+  // 이미지마다 다른 alt 를 준다 — 전부 상품명이면 SEO·접근성 모두 손해다.
+  const altFor = (role: string, i?: number) =>
+    i === undefined ? `${facts.name} ${role}` : `${facts.name} ${role} ${i + 1}`;
 
   // S1. 무드 메인컷 — 업로드 이미지가 있을 때만 (사진을 만들지 않음)
   let imgCursor = 0;
@@ -129,7 +160,7 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
     blocks.push({
       id: uuid(),
       type: "image",
-      data: { url: imageUrls[imgCursor], alt, width: "full" },
+      data: { url: imageUrls[imgCursor], alt: altFor("메인 컷"), width: "full" },
     });
     slots.push({ slot: "hero", filledWith: "product-image[0]" });
     imgCursor += 1;
@@ -137,7 +168,7 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
     slots.push({ slot: "hero", filledWith: "skipped (no images)" });
   }
 
-  // S2. 한 줄 컨셉 — 보이스
+  // S2. 후킹 한 줄 — 보이스
   blocks.push({
     id: uuid(),
     type: "banner",
@@ -145,7 +176,7 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
   });
   slots.push({ slot: "hero_caption", filledWith: "voice" });
 
-  // S3. 컨셉·브랜드 스토리 — 보이스 (생성 시점에 sanitize 하여 초안도 항상 안전)
+  // S3. 컨셉·제작 스토리 — 보이스 (생성 시점에 sanitize 하여 초안도 항상 안전)
   blocks.push({
     id: uuid(),
     type: "richtext",
@@ -153,7 +184,19 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
   });
   slots.push({ slot: "concept", filledWith: "voice" });
 
-  // S4. 핵심 포인트 2~3 — 보이스 + (가능하면)이미지. 이미지 없으면 richtext 로 폴백.
+  // S4. 문제 공감 → 해결 — 보이스 (v2 신규, 없으면 건너뛴다)
+  if (voice.problemHtml?.trim()) {
+    blocks.push({
+      id: uuid(),
+      type: "richtext",
+      data: { html: sanitizeRichText(voice.problemHtml) },
+    });
+    slots.push({ slot: "problem_solution", filledWith: "voice" });
+  } else {
+    slots.push({ slot: "problem_solution", filledWith: "skipped (not generated)" });
+  }
+
+  // S5. 핵심 포인트 2~3 — 보이스 + (가능하면)이미지. 이미지 없으면 richtext 로 폴백.
   voice.points.slice(0, 3).forEach((p, i) => {
     const bodyHtml = sanitizeRichText(`<h3>${escapeHtml(p.title)}</h3>${p.bodyHtml}`);
     if (imgCursor < imageUrls.length) {
@@ -161,7 +204,7 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
         id: uuid(),
         type: "twocol",
         data: {
-          image: { url: imageUrls[imgCursor], alt },
+          image: { url: imageUrls[imgCursor], alt: altFor("포인트 컷", i) },
           text: { html: bodyHtml },
           imageSide: i % 2 === 0 ? "left" : "right",
         },
@@ -174,21 +217,31 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
     }
   });
 
-  // S5. 디테일 갤러리 — 남은 이미지 배치만 (2장 이상일 때)
+  // S6. 디테일 갤러리 — 남은 이미지 배치만 (2장 이상일 때)
   const remaining = imageUrls.slice(imgCursor);
   if (remaining.length >= 2) {
     blocks.push({
       id: uuid(),
       type: "gallery",
       data: {
-        images: remaining.slice(0, 20).map((url) => ({ url, alt })),
+        images: remaining
+          .slice(0, 20)
+          .map((url, i) => ({ url, alt: altFor("디테일 컷", i) })),
         columns: remaining.length >= 6 ? 3 : 2,
       },
     });
     slots.push({ slot: "detail_gallery", filledWith: `product-image[${imgCursor}..]` });
   }
 
-  // S6. 스펙 — DB(details) 사실값. 없으면 라벨만 스캐폴딩(값=플레이스홀더).
+  // S7. 핸드메이드 고지 — 개체차는 상품 특성 설명이라 고정 문구(사실 아님).
+  blocks.push({
+    id: uuid(),
+    type: "richtext",
+    data: { html: sanitizeRichText(HANDMADE_VARIANCE_TEXT) },
+  });
+  slots.push({ slot: "handmade_notice", filledWith: "fixed" });
+
+  // S8. 스펙 — DB(details) 사실값. 없으면 라벨만 스캐폴딩(값=플레이스홀더).
   const specRows = parseSpecRows(facts.details);
   if (specRows.length > 0) {
     blocks.push({ id: uuid(), type: "spec", data: { title: "PRODUCT SPEC", rows: specRows } });
@@ -210,7 +263,7 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
     factsNeedingInput.push("details(소재/크기/원산지)");
   }
 
-  // S7. 케어 — DB(care) 사실값. 없으면 빈 항목 스캐폴딩.
+  // S9. 케어 — DB(care) 사실값. 없으면 빈 항목 스캐폴딩.
   const careItems = parseCareItems(facts.care);
   if (careItems.length > 0) {
     blocks.push({ id: uuid(), type: "care", data: { items: careItems } });
@@ -225,24 +278,68 @@ export function assembleBlocks(input: AssembleInput): AssembleResult {
     factsNeedingInput.push("care(세탁·관리 방법)");
   }
 
-  // S8. 배송·교환반품 — DB(shipping) 또는 기본 고정 텍스트
-  const shippingHtml = facts.shipping?.trim()
+  // S10. 거래조건 — 법정 5개 대분류. DB(shipping) 값이 있으면 앞에 덧붙인다.
+  const operatorShipping = facts.shipping?.trim()
     ? facts.shipping
         .split(/\r?\n/)
         .map((l) => l.trim())
         .filter(Boolean)
         .map((l) => `<p>${escapeHtml(l)}</p>`)
         .join("")
-    : DEFAULT_SHIPPING_TEXT;
-  blocks.push({ id: uuid(), type: "richtext", data: { html: sanitizeRichText(shippingHtml) } });
-  slots.push({ slot: "shipping", filledWith: facts.shipping?.trim() ? "db:shipping" : "default" });
+    : "";
+  const tradeTermsHtml =
+    operatorShipping +
+    TRADE_TERMS_SECTIONS.map(
+      (s) => `<p><strong>${escapeHtml(s.title)}</strong><br>${escapeHtml(s.body)}</p>`
+    ).join("");
+  blocks.push({
+    id: uuid(),
+    type: "richtext",
+    data: { html: sanitizeRichText(tradeTermsHtml) },
+  });
+  slots.push({
+    slot: "trade_terms",
+    filledWith: facts.shipping?.trim() ? "db:shipping + legal" : "legal",
+  });
+
+  // S11. 상품정보제공고시 — 100% 사실 슬롯. 모델은 이 근처에 오지 않는다.
+  const noticeRows = noticeRowsFor(facts);
+  const category = resolveNoticeCategory(facts);
+  blocks.push({
+    id: uuid(),
+    type: "spec",
+    data: { title: `상품정보제공고시 ${category.label}`, rows: noticeRows },
+  });
+  slots.push({ slot: "legal_notice", filledWith: `db-only (${category.code})` });
+
+  const legalGaps = noticeRows
+    .filter((r) => r.value === FACT_PLACEHOLDER)
+    .map((r) => r.label);
+
+  // S12. 클로징 — 보이스 (없으면 건너뛴다)
+  if (voice.closingHtml?.trim()) {
+    blocks.push({
+      id: uuid(),
+      type: "richtext",
+      data: { html: sanitizeRichText(voice.closingHtml) },
+    });
+    slots.push({ slot: "closing", filledWith: "voice" });
+  } else {
+    slots.push({ slot: "closing", filledWith: "skipped (not generated)" });
+  }
 
   // 구조 검증 (이미지 출처 검증은 발행 경계에서 재수행)
   const validated = BlocksSchema.parse(blocks);
 
   return {
     blocks: validated,
-    meta: { recipeVersion: RECIPE_VERSION, slots, factsNeedingInput },
+    meta: {
+      recipeVersion: RECIPE_VERSION,
+      slots,
+      factsNeedingInput,
+      noticeCategory: category.code,
+      legalGaps,
+    },
   };
 }
 

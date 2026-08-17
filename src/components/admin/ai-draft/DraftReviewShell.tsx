@@ -22,6 +22,10 @@ export interface DraftReviewShellProps {
   revision: number;
   feedback: string | null;
   factsNeedingInput: string[];
+  /** 법정 고지 중 비어 있는 항목 — 채우기 전까지 발행이 막힌다 */
+  legalGaps?: string[];
+  /** 품질 루프 판정 결과 */
+  quality?: { score: number; passed: boolean; attempts: number } | null;
 }
 
 export default function DraftReviewShell({
@@ -34,6 +38,8 @@ export default function DraftReviewShell({
   revision,
   feedback,
   factsNeedingInput,
+  legalGaps = [],
+  quality = null,
 }: DraftReviewShellProps) {
   const router = useRouter();
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
@@ -127,6 +133,18 @@ export default function DraftReviewShell({
           <span className="text-[10px] uppercase tracking-wider border border-[var(--pb-light-gray)] px-1.5 py-0.5 text-[var(--pb-gray)] shrink-0">
             v{revision} · {generator ?? "manual"}
           </span>
+          {quality && (
+            <span
+              title={`AI 품질 판정 ${quality.score.toFixed(1)}/10 · 생성 ${quality.attempts}회`}
+              className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 shrink-0 border ${
+                quality.passed
+                  ? "border-[var(--pb-jet-black)] text-[var(--pb-jet-black)]"
+                  : "border-[var(--accent-sale)] text-[var(--accent-sale)]"
+              }`}
+            >
+              품질 {quality.score.toFixed(1)}/10
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex border border-[var(--pb-jet-black)]">
@@ -149,6 +167,26 @@ export default function DraftReviewShell({
       {feedback && (
         <div className="border border-[var(--pb-jet-black)] bg-[var(--pb-snow)] px-4 py-2 text-xs">
           <span className="font-semibold">반영한 직전 의견:</span> {feedback}
+        </div>
+      )}
+
+      {/* 법정 고지 미기입 — 채우기 전까지 발행이 막힌다 (경고가 아니라 차단 사유) */}
+      {legalGaps.length > 0 && (
+        <div className="border-[1.5px] border-[var(--accent-sale)] bg-red-50 px-4 py-3 text-xs flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 mt-0.5 text-[var(--accent-sale)] shrink-0" />
+          <div className="space-y-1">
+            <p className="font-semibold text-[var(--accent-sale)]">
+              법정 고지 {legalGaps.length}개 항목이 비어 있어 발행할 수 없습니다
+            </p>
+            <p>
+              전자상거래법 상품정보제공고시가 요구하는 항목입니다. 편집 탭의
+              &lsquo;상품정보제공고시&rsquo; 표에서 채워주세요:{" "}
+              <strong>{legalGaps.join(", ")}</strong>
+            </p>
+            <p className="text-[var(--pb-gray)]">
+              값을 모르면 빈칸으로 두지 말고 확인 방법이나 사유를 적어주세요.
+            </p>
+          </div>
         </div>
       )}
 
