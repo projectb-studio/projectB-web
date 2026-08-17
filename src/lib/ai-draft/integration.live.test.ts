@@ -162,4 +162,50 @@ describe.skipIf(!RUN)("AI draft — live integration smoke", () => {
     const v1Reloaded = await mod.drafts.getDraft(v1.id);
     expect(v1Reloaded?.status).toBe("rejected");
   }, 180_000);
+
+  it("새 상품 등록 직후 곧바로 첫 초안을 만들 수 있다", async () => {
+    // 등록 폼이 하는 순서 그대로: 상품을 만들고 → 그 id 로 초안을 생성한다.
+    const supabase = mod.createAdminClient();
+    const slug = `__ai-draft-create-${crypto.randomUUID().slice(0, 8)}`;
+    const { data, error } = await (
+      supabase.from("pb_products") as ReturnType<typeof supabase.from>
+    )
+      .insert({
+        name: "__AI_DRAFT_CREATE_SMOKE__",
+        slug,
+        price: 24000,
+        tag: "wood",
+        is_published: false,
+        sort_order: 9999,
+        description: "등록 직후 초안 생성 확인용",
+        detail_blocks: [],
+      } as never)
+      .select("id")
+      .single();
+    if (error || !data) throw new Error(`temp product insert failed: ${error?.message}`);
+    const freshId = (data as { id: string }).id;
+
+    try {
+      const draft = await mod.generate(freshId);
+
+      expect(draft.product_id).toBe(freshId);
+      expect(draft.status).toBe("pending");
+      expect(draft.revision).toBe(1);
+      expect(Array.isArray(draft.blocks)).toBe(true);
+      expect((draft.blocks as unknown[]).length).toBeGreaterThan(0);
+
+      // 등록 직후에도 라이브 상세페이지는 비어 있어야 한다 (격리 유지).
+      const { data: after } = await (
+        supabase.from("pb_products") as ReturnType<typeof supabase.from>
+      )
+        .select("detail_blocks")
+        .eq("id", freshId)
+        .single();
+      expect((after as { detail_blocks: unknown }).detail_blocks).toEqual([]);
+    } finally {
+      await (supabase.from("pb_products") as ReturnType<typeof supabase.from>)
+        .delete()
+        .eq("id", freshId);
+    }
+  }, 180_000);
 });

@@ -54,6 +54,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!initialData?.id;
   const [saving, setSaving] = useState(false);
+  // 등록 직후 AI 초안까지 이어서 만들지. 수정 화면에는 이미 'AI 초안' 버튼이 있어 안 쓴다.
+  const [generateDraft, setGenerateDraft] = useState(true);
+  const [phase, setPhase] = useState<"idle" | "saving" | "drafting">("idle");
 
   const [form, setForm] = useState<ProductFormData>(
     initialData ?? {
@@ -101,6 +104,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     e.preventDefault();
     if (saving) return;
     setSaving(true);
+    setPhase("saving");
 
     const { images, options, ...productData } = form;
 
@@ -114,14 +118,58 @@ export function ProductForm({ initialData }: ProductFormProps) {
       body: JSON.stringify({ ...productData, images, options }),
     });
 
-    if (res.ok) {
-      router.push("/admin/products");
-      router.refresh();
-    } else {
-      const data = await res.json();
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
       alert(data.error ?? "저장 실패");
       setSaving(false);
+      setPhase("idle");
+      return;
     }
+
+    // 등록만 하고 초안은 만들지 않는 경우 (수정 화면 포함)
+    if (isEdit || !generateDraft) {
+      router.push("/admin/products");
+      router.refresh();
+      return;
+    }
+
+    const created = (await res.json().catch(() => null)) as { id?: string } | null;
+    if (!created?.id) {
+      router.push("/admin/products");
+      router.refresh();
+      return;
+    }
+
+    // 여기부터 실패해도 상품 등록은 이미 끝났다. 초안 생성 실패가 등록을 되돌리지 않는다.
+    setPhase("drafting");
+    try {
+      const draftRes = await fetch(`/api/admin/products/${created.id}/drafts`, {
+        method: "POST",
+      });
+      const draftData = (await draftRes.json().catch(() => ({}))) as {
+        draft?: { id?: string };
+        error?: string;
+      };
+
+      if (draftRes.ok && draftData.draft?.id) {
+        router.push(`/admin/drafts/${draftData.draft.id}/review`);
+        router.refresh();
+        return;
+      }
+
+      alert(
+        `상품은 등록됐지만 AI 초안 생성에 실패했습니다: ${draftData.error ?? draftRes.status}\n` +
+          `상품 초안 화면에서 다시 시도할 수 있습니다.`
+      );
+    } catch (err) {
+      alert(
+        `상품은 등록됐지만 AI 초안 생성에 실패했습니다: ${(err as Error).message}\n` +
+          `상품 초안 화면에서 다시 시도할 수 있습니다.`
+      );
+    }
+
+    router.push(`/admin/products/${created.id}/drafts`);
+    router.refresh();
   }
 
   const inputClass =
@@ -355,10 +403,35 @@ export function ProductForm({ initialData }: ProductFormProps) {
         </div>
       </div>
 
+      {/* AI 초안 — 등록 시에만. 수정 화면에는 이미 'AI 초안' 버튼이 따로 있다. */}
+      {!isEdit && (
+        <label className="flex items-start gap-2.5 border border-[var(--pb-light-gray)] p-4 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={generateDraft}
+            onChange={(e) => setGenerateDraft(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span className="text-sm">
+            등록 후 AI 상세페이지 초안 만들기
+            <span className="block text-xs text-[var(--pb-gray)] mt-1">
+              등록이 끝나면 초안을 생성하고 검수 화면으로 이동합니다. 초안은 검토·승인해야만
+              고객에게 발행되며, 지금 입력한 사진과 상세정보를 그대로 씁니다.
+            </span>
+          </span>
+        </label>
+      )}
+
       {/* Submit */}
       <div className="flex items-center gap-3">
         <button type="submit" disabled={saving} className="btn-primary px-8 py-3 text-sm disabled:opacity-50">
-          {saving ? "저장 중..." : isEdit ? "상품 수정" : "상품 등록"}
+          {phase === "drafting"
+            ? "AI 초안 생성 중..."
+            : phase === "saving"
+              ? "저장 중..."
+              : isEdit
+                ? "상품 수정"
+                : "상품 등록"}
         </button>
         <button
           type="button"
