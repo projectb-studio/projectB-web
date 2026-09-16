@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PROJECT B 시스템 구성",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "buy-path",
+        "label": "구매 경로",
+        "focus": [
+          "customers",
+          "web",
+          "api",
+          "supabase",
+          "portone"
+        ],
+        "note": "고객이 상품을 담고 결제까지 가는 주 경로. 결제 검증은 서버에서만 일어난다."
+      },
+      {
+        "id": "admin-path",
+        "label": "운영 경로",
+        "focus": [
+          "owner",
+          "admin",
+          "api",
+          "supabase",
+          "r2"
+        ],
+        "note": "사장님이 상품·주문·회원을 다루는 관리자 콘솔 경로."
+      },
+      {
+        "id": "ai-path",
+        "label": "AI 초안 경로",
+        "focus": [
+          "admin",
+          "api",
+          "claude",
+          "supabase"
+        ],
+        "note": "상품 상세 초안을 LLM 이 쓰고 운영자가 검수한 뒤에만 발행된다."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "운영자",
+      "sublabel": "사장님",
+      "pos": [
+        40,
+        140
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "admin",
+      "type": "frontend",
+      "label": "관리자 콘솔",
+      "sublabel": "/admin · 동일 배포",
+      "pos": [
+        340,
+        140
+      ],
+      "size": [
+        180,
+        64
+      ]
+    },
+    {
+      "id": "claude",
+      "type": "external",
+      "label": "Claude",
+      "sublabel": "상품 상세 초안 생성",
+      "pos": [
+        700,
+        140
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "brand": "anthropic"
+    },
+    {
+      "id": "customers",
+      "type": "external",
+      "label": "고객",
+      "sublabel": "브라우저",
+      "pos": [
+        40,
+        340
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Next.js 14",
+      "sublabel": "App Router · 스토어프론트",
+      "pos": [
+        340,
+        340
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "brand": "next-js"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Route Handlers",
+      "sublabel": "서버 전용 엔드포인트",
+      "pos": [
+        700,
+        340
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "portone",
+      "type": "external",
+      "label": "PortOne V2",
+      "sublabel": "결제 · 서버 검증",
+      "pos": [
+        1030,
+        340
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "r2",
+      "type": "cloud",
+      "label": "Cloudflare R2",
+      "sublabel": "상품 이미지",
+      "pos": [
+        340,
+        540
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "brand": "cloudflare"
+    },
+    {
+      "id": "supabase",
+      "type": "database",
+      "label": "Supabase",
+      "sublabel": "PostgreSQL · Auth · RLS",
+      "pos": [
+        700,
+        540
+      ],
+      "size": [
+        190,
+        64
+      ],
+      "brand": "supabase"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Vercel 단일 Next.js 배포",
+      "wraps": [
+        "web",
+        "admin",
+        "api"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cust-web",
+      "from": "customers",
+      "to": "web",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "label": "fetch · 서버 액션",
+      "variant": "emphasis",
+      "labelDx": -46
+    },
+    {
+      "id": "owner-admin",
+      "from": "owner",
+      "to": "admin",
+      "label": "관리자 로그인",
+      "labelDy": 58
+    },
+    {
+      "id": "admin-api",
+      "from": "admin",
+      "to": "api",
+      "label": "운영 API",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "labelSegment": 1
+    },
+    {
+      "id": "api-portone",
+      "from": "api",
+      "to": "portone",
+      "label": "결제 대사 · 웹훅 검증"
+    },
+    {
+      "id": "api-claude",
+      "from": "api",
+      "to": "claude",
+      "label": "초안 생성 · 비용 캡"
+    },
+    {
+      "id": "api-sb",
+      "from": "api",
+      "to": "supabase",
+      "label": "SQL · RLS",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "api-r2",
+      "from": "api",
+      "to": "r2",
+      "label": "서명 업로드"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "단일 배포",
+      "items": [
+        "스토어프론트와 관리자 콘솔이 같은 Next.js 앱이다",
+        "Route Handler 55개가 서버 경계를 이룬다",
+        "인증·권한은 Supabase Auth 와 RLS 가 집행한다"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "결제 신뢰 경계",
+      "items": [
+        "브라우저는 PortOne SDK 로 결제를 시작만 한다",
+        "금액·상태 검증은 서버가 PortOne API 로 재확인한다",
+        "클라이언트가 보낸 금액을 신뢰하지 않는다"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "AI 환각 격리",
+      "items": [
+        "LLM 초안은 draft 상태로만 저장된다",
+        "운영자 검수를 통과해야 발행 경계를 넘는다",
+        "결정론적 카피 검사와 비용 하드캡이 앞단에 있다"
+      ]
+    }
+  ]
+}

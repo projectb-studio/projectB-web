@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROJECT B 설계문서</title>
+<meta name="description" content="오프라인 매장이 본진인 핸드메이드 소품 브랜드의 온라인 채널. 운영자가 개발자 없이 굴릴 수 있는 수준으로.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+               "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-canvas:      #ffffff;
+  --color-surface:     #f5f5f7;
+  --color-surface-alt: #fbfbfd;
+  --color-line:        rgba(0,0,0,.10);
+  --color-line-soft:   rgba(0,0,0,.055);
+  --color-text:        #1d1d1f;
+  --color-text-2:      #56565b;
+  --color-text-3:      #86868b;
+  --color-accent:      #0071e3;
+  --color-open:        #b25000;
+  --color-open-bg:     rgba(255,149,0,.13);
+  --color-done:        #0a7b45;
+  --color-done-bg:     rgba(48,209,88,.14);
+  --color-warn:        #b3261e;
+  --color-warn-bg:     rgba(255,59,48,.10);
+
+  --text-hero:  clamp(2.25rem, 1.4rem + 3.6vw, 4rem);
+  --text-h2:    clamp(1.5rem, 1.15rem + 1.5vw, 2.125rem);
+  --text-h3:    clamp(1.1rem, .98rem + .5vw, 1.35rem);
+  --text-base:  clamp(1rem, .96rem + .18vw, 1.0625rem);
+  --text-small:  .8125rem;
+
+  --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+  --radius:      18px;
+  --radius-sm:   10px;
+  --shell:       min(1440px, 100%);
+  --measure:     72ch;
+  --duration:    260ms;
+  --ease:        cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-canvas:      #000000;
+    --color-surface:     #161617;
+    --color-surface-alt: #0d0d0e;
+    --color-line:        rgba(255,255,255,.14);
+    --color-line-soft:   rgba(255,255,255,.07);
+    --color-text:        #f5f5f7;
+    --color-text-2:      #b8b8bd;
+    --color-text-3:      #86868b;
+    --color-accent:      #2997ff;
+    --color-open:        #ff9f0a;
+    --color-open-bg:     rgba(255,159,10,.15);
+    --color-done:        #30d158;
+    --color-done-bg:     rgba(48,209,88,.15);
+    --color-warn:        #ff6961;
+    --color-warn-bg:     rgba(255,69,58,.15);
+  }
+}
+:root[data-theme="dark"] {
+  --color-canvas:#000; --color-surface:#161617; --color-surface-alt:#0d0d0e;
+  --color-line:rgba(255,255,255,.14); --color-line-soft:rgba(255,255,255,.07);
+  --color-text:#f5f5f7; --color-text-2:#b8b8bd; --color-text-3:#86868b;
+  --color-accent:#2997ff; --color-open:#ff9f0a; --color-open-bg:rgba(255,159,10,.15);
+  --color-done:#30d158; --color-done-bg:rgba(48,209,88,.15);
+  --color-warn:#ff6961; --color-warn-bg:rgba(255,69,58,.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--color-canvas); color: var(--color-text);
+  font-family: var(--font-sans); font-size: var(--text-base); line-height: 1.66;
+  letter-spacing: -.011em; -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+
+/* ── 상단 바 ── */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--color-canvas) 72%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--color-line-soft);
+}
+.topbar-inner {
+  max-width: var(--shell); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px);
+  height: 52px; display: flex; align-items: center; gap: 16px;
+}
+.topbar-title { font-size: var(--text-small); font-weight: 600; letter-spacing: -.01em; }
+.topbar-meta { font-size: var(--text-small); color: var(--color-text-3); margin-left: auto; }
+@media (max-width: 519px) { .topbar-meta { display: none; } .topbar-title { margin-right: auto; } }
+.theme-toggle {
+  appearance: none; border: 1px solid var(--color-line); background: transparent;
+  color: var(--color-text-2); font: inherit; font-size: var(--text-small);
+  padding: 4px 12px; border-radius: 980px; cursor: pointer;
+  transition: color var(--duration) var(--ease), border-color var(--duration) var(--ease), transform var(--duration) var(--ease);
+}
+.theme-toggle:hover { color: var(--color-text); border-color: var(--color-text-3); }
+.theme-toggle:active { transform: scale(.96); }
+.theme-toggle:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* ── 히어로 ── */
+.hero {
+  max-width: var(--shell); margin: 0 auto;
+  padding: clamp(3.5rem, 2rem + 8vw, 7rem) clamp(16px, 4vw, 40px) clamp(2rem, 1rem + 3vw, 3.5rem);
+}
+.hero .eyebrow {
+  font-size: var(--text-small); font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--color-accent); margin: 0 0 1rem;
+}
+.hero h1 {
+  font-size: var(--text-hero); line-height: 1.06; letter-spacing: -.028em;
+  font-weight: 700; margin: 0 0 1.25rem; max-width: 20ch;
+}
+.hero .lede { font-size: clamp(1.0625rem,1rem + .5vw,1.3125rem); color: var(--color-text-2); max-width: 46ch; margin: 0; }
+
+/* ── 레이아웃 ── */
+.shell {
+  max-width: var(--shell); margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 40px) var(--space-section);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem);
+}
+@media (min-width: 1024px) { .shell { grid-template-columns: 236px minmax(0,1fr); } }
+
+.toc { display: none; }
+@media (min-width: 1024px) {
+  .toc {
+    display: block; position: sticky; top: 76px; align-self: start;
+    max-height: calc(100vh - 100px); overflow-y: auto; padding-right: 8px;
+  }
+}
+.toc h2 {
+  font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--color-text-3); margin: 0 0 .85rem; border: 0; padding: 0;
+}
+.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+.toc li { margin: 0; }
+.toc a {
+  display: block; padding: 5px 0 5px 12px; font-size: var(--text-small); line-height: 1.45;
+  color: var(--color-text-3); text-decoration: none; border-left: 2px solid var(--color-line-soft);
+  transition: color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+.toc a:hover { color: var(--color-text); border-left-color: var(--color-text-3); }
+.toc a.is-active { color: var(--color-accent); border-left-color: var(--color-accent); font-weight: 500; }
+.toc a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 3px; }
+
+.doc { min-width: 0; overflow-wrap: anywhere; }
+.toc { min-width: 0; }
+.doc > * { max-width: var(--measure); }
+.doc > .table-wrap, .doc > figure, .doc > hr { max-width: none; }
+
+/* ── 타이포 ── */
+.doc h1 { display: none; }
+.doc h2 {
+  font-size: var(--text-h2); font-weight: 650; letter-spacing: -.022em; line-height: 1.18;
+  margin: var(--space-section) 0 1.1rem; padding-top: 1.75rem;
+  border-top: 1px solid var(--color-line-soft);
+}
+.doc h2:first-of-type { margin-top: 0; border-top: 0; padding-top: 0; }
+.doc h3 { font-size: var(--text-h3); font-weight: 620; letter-spacing: -.015em; margin: 2.25rem 0 .7rem; }
+.doc h4 { font-size: 1rem; font-weight: 620; margin: 1.75rem 0 .5rem; color: var(--color-text-2); }
+.doc p { margin: 0 0 1.05rem; }
+.doc ul, .doc ol { margin: 0 0 1.15rem; padding-left: 1.35rem; }
+.doc li { margin: .38rem 0; }
+.doc li::marker { color: var(--color-text-3); }
+.doc a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color var(--duration) var(--ease); }
+.doc a:hover { border-bottom-color: currentColor; }
+.doc a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 3px; }
+.doc strong { font-weight: 640; color: var(--color-text); }
+.doc hr { border: 0; height: 1px; background: var(--color-line-soft); margin: var(--space-section) 0; }
+
+code {
+  font-family: var(--font-mono); font-size: .875em; letter-spacing: 0;
+  background: var(--color-surface); border: 1px solid var(--color-line-soft);
+  padding: .1em .38em; border-radius: 6px; word-break: break-word;
+}
+pre {
+  background: var(--color-surface-alt); border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-sm); padding: 1.1rem 1.25rem; overflow-x: auto; margin: 0 0 1.4rem;
+}
+pre code { background: none; border: 0; padding: 0; font-size: .8125rem; line-height: 1.6; }
+
+blockquote {
+  margin: 0 0 1.5rem; padding: 1.1rem 1.35rem;
+  background: var(--color-surface); border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-accent); color: var(--color-text-2);
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+/* ── 표 ── */
+.table-wrap { overflow-x: auto; margin: 0 0 1.6rem; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: .9375rem; }
+thead th {
+  text-align: left; font-weight: 600; font-size: var(--text-small);
+  letter-spacing: .01em; color: var(--color-text-3);
+  padding: .6rem .85rem; border-bottom: 1px solid var(--color-line); white-space: nowrap;
+}
+tbody td { padding: .72rem .85rem; border-bottom: 1px solid var(--color-line-soft); vertical-align: top; }
+tbody tr { transition: background var(--duration) var(--ease); }
+tbody tr:hover { background: var(--color-surface-alt); }
+tbody td:first-child { white-space: nowrap; color: var(--color-text-2); }
+
+/* ── Q&A 카드 ── */
+.qa {
+  background: var(--color-surface); border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius); padding: 1.4rem 1.5rem .6rem;
+  margin: 0 0 1.1rem; max-width: var(--measure);
+  transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+.qa:hover { transform: translateY(-2px); border-color: var(--color-line); }
+.qa-q { font-weight: 620; letter-spacing: -.015em; margin: 0 0 .7rem; }
+.qa-q strong { font-weight: 620; }
+.qa-a { color: var(--color-text-2); margin: 0 0 .9rem; }
+.qa .status { margin: 0 0 .9rem; }
+
+/* ── 배지 ── */
+.badge {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: -.005em;
+  padding: 3px 11px; border-radius: 980px; line-height: 1.5;
+}
+.badge-open     { color: var(--color-open); background: var(--color-open-bg); }
+.badge-resolved { color: var(--color-done); background: var(--color-done-bg); }
+.badge-neutral  { color: var(--color-text-3); background: var(--color-surface); }
+.unverified {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  color: var(--color-warn); background: var(--color-warn-bg);
+  padding: 1px 8px; border-radius: 980px; letter-spacing: .01em;
+}
+
+/* ── 도면 ── */
+.diagram { margin: 0 0 1.75rem; padding: 1.5rem; background: var(--color-surface-alt);
+  border: 1px solid var(--color-line-soft); border-radius: var(--radius); overflow-x: auto; }
+.diagram pre { background: none; border: 0; padding: 0; margin: 0; }
+.diagram .mermaid { text-align: center; }
+.diagram-embed { margin: 0 0 1.75rem; border: 1px solid var(--color-line);
+  border-radius: var(--radius); overflow: hidden; background: var(--color-surface-alt); }
+.diagram-embed iframe { display: block; width: 100%; height: clamp(320px, 78vh, 760px); border: 0; }
+.diagram-embed figcaption {
+  display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+  padding: .7rem 1.1rem; font-size: var(--text-small); color: var(--color-text-3);
+  border-top: 1px solid var(--color-line-soft);
+}
+
+/* ── 푸터 ── */
+.site-footer {
+  border-top: 1px solid var(--color-line-soft); background: var(--color-surface-alt);
+}
+.site-footer .inner {
+  max-width: var(--shell); margin: 0 auto;
+  padding: 2.5rem clamp(16px, 4vw, 40px);
+  font-size: var(--text-small); color: var(--color-text-3);
+  display: flex; flex-wrap: wrap; gap: 8px 24px;
+}
+.site-footer a { color: var(--color-text-2); text-decoration: none; }
+.site-footer a:hover { color: var(--color-accent); }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--color-accent); color: #fff; padding: 10px 18px; border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#doc-main">본문으로 건너뛰기</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="topbar-title">PROJECT B</span>
+    <span class="topbar-meta">설계문서 · 2026-09-16</span>
+    <button class="theme-toggle" type="button" id="theme-toggle" aria-label="테마 전환">테마</button>
+  </div>
+</header>
+
+<section class="hero" aria-labelledby="hero-heading">
+  <p class="eyebrow">Design Document</p>
+  <h1 id="hero-heading">PROJECT B</h1>
+  <p class="lede">오프라인 매장이 본진인 핸드메이드 소품 브랜드의 온라인 채널. 운영자가 개발자 없이 굴릴 수 있는 수준으로.</p>
+</section>
+
+<div class="shell">
+  <nav class="toc" aria-label="목차">
+    <h2>목차</h2>
+    <ol><li><a href="#0-이-프로젝트에-설계문서가-필요한가">0. 이 프로젝트에 설계문서가 필요한가</a></li><li><a href="#1-objective-목적">1. Objective (목적)</a></li><li><a href="#2-background-배경">2. Background (배경)</a></li><li><a href="#3-related-documents-관련-문서">3. Related Documents (관련 문서)</a></li><li><a href="#4-goals-목표">4. Goals (목표)</a></li><li><a href="#5-non-goals-비목표">5. Non-goals (비목표)</a></li><li><a href="#6-scenarios-시나리오">6. Scenarios (시나리오)</a></li><li><a href="#7-diagrams-도면">7. Diagrams (도면)</a></li><li><a href="#8-glossary-용어">8. Glossary (용어)</a></li><li><a href="#9-constraints-제약">9. Constraints (제약)</a></li><li><a href="#10-service-level-objectives-slo">10. Service Level Objectives (SLO)</a></li><li><a href="#11-monitoring-alerting-관측-알림">11. Monitoring / Alerting (관측·알림)</a></li><li><a href="#12-timeline-마일스톤">12. Timeline (마일스톤)</a></li><li><a href="#13-interfaces-인터페이스">13. Interfaces (인터페이스)</a></li><li><a href="#14-dependencies-infrastructure-의존성-인프라">14. Dependencies / Infrastructure (의존성·인프라)</a></li><li><a href="#15-security-보안">15. Security (보안)</a></li><li><a href="#16-privacy-프라이버시">16. Privacy (프라이버시)</a></li><li><a href="#17-legal-considerations-법적-고려">17. Legal Considerations (법적 고려)</a></li><li><a href="#18-logging-로깅">18. Logging (로깅)</a></li><li><a href="#19-open-issues-미결-이슈">19. Open Issues (미결 이슈)</a></li><li><a href="#20-resolved-issues-해결된-이슈">20. Resolved Issues (해결된 이슈)</a></li><li><a href="#21-alternatives-considered-검토한-대안">21. Alternatives Considered (검토한 대안)</a></li><li><a href="#22-설계-리뷰-q-a">22. 설계 리뷰 Q&amp;A</a></li></ol>
+  </nav>
+  <main class="doc" id="doc-main">
+<figure class="diagram-embed">
+  <iframe src="diagrams/architecture.html" title="PROJECT B 시스템 구성도" loading="lazy"></iframe>
+  <figcaption>
+    <strong>시스템 구성도</strong>
+    <a href="diagrams/architecture.html">새 창에서 크게 보기</a>
+    <a href="diagrams/architecture.json">원본 명세 (JSON)</a>
+    <span>archify 로 생성 · 검증 통과</span>
+  </figcaption>
+</figure>
+<h1 id="project-b-설계문서">PROJECT B 설계문서</h1>
+<blockquote><p><strong>이 문서는 역설계된 설계문서다.</strong> PROJECT B 는 설계문서 없이 시작해 127 개 커밋을 쌓았고, 이 문서는 코드·커밋·<code>CLAUDE.md</code> 에서 결정을 거꾸로 복원한 것이다. 확인하지 못한 항목은 <code><span class="unverified">미확인</span></code> 으로 표시했다. 추정을 사실처럼 적지 않는다.</p><p><strong>이 저장소는 공개(public)다.</strong> 따라서 이 문서에는 사업 계약·단가·거래처 식별 정보를 새로 싣지 않는다. 관련해서 이미 발생한 문제는 §19 O1 에 적었다.</p></blockquote>
+<div class="table-wrap"><table><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td><strong>작성자</strong></td><td>고경석 (kugll9606@gmail.com)</td></tr><tr><td><strong>작성일</strong></td><td>2026-09-16</td></tr><tr><td><strong>대상 리비전</strong></td><td><code>main</code> @ <code>6d0bd61</code></td></tr><tr><td><strong>저장소</strong></td><td><code>projectb-studio/projectB-web</code> (공개)</td></tr><tr><td><strong>상태</strong></td><td>역설계 초안 — 리뷰 전</td></tr><tr><td><strong>정본 위치</strong></td><td><code>docs/design/DESIGN.md</code></td></tr></tbody></table></div>
+<hr>
+<h2 id="0-이-프로젝트에-설계문서가-필요한가">0. 이 프로젝트에 설계문서가 필요한가</h2>
+<p><a href="https://refactoringenglish.com/excerpts/write-an-effective-design-doc/">Refactoring English, <em>Write an Effective Design Doc</em></a> 의 판정 질문. 기준은 <strong>"틀렸을 때의 비용"</strong> 이다.</p>
+<div class="table-wrap"><table><thead><tr><th>판정 질문</th><th>PROJECT B</th></tr></thead><tbody><tr><td>여러 사람이 협업하는가</td><td><strong>예</strong> — 개발자 1 인 + 발주처 운영자. 운영자가 실제로 시스템을 쓴다</td></tr><tr><td>3 개월 이상 full-time 규모인가</td><td><strong>예</strong> — 2026-03-31 ~ 2026-08-17, 약 4.5 개월</td></tr><tr><td>구현이 수년간 프로덕션에서 도는가</td><td><strong>예</strong> — 실매장 온라인 채널</td></tr><tr><td>팀 간 협업이 필요한가</td><td>부분적 — 후속 Delfina 와 DB 를 공유할 계획이 있다</td></tr><tr><td>목표·요구사항이 모호한가</td><td><strong>예</strong> — 오프라인이 메인인 쇼핑몰이라는 전제가 페이지 우선순위를 뒤집는다</td></tr><tr><td>설계 시점에 막을 수 있는 치명적 위험이 있는가</td><td><strong>예</strong> — 결제 검증, 개인정보, 공개 저장소의 사업 문서 노출, LLM 환각의 대외 발행</td></tr></tbody></table></div>
+<p>6 개 중 5 개가 "예"다. 특히 마지막이 실제 비용을 발생시켰다 — <strong>공개 저장소에 사업 계약 문서가 커밋돼 있다</strong>(§19 O1). 설계 시점의 한 줄 ("공개 저장소에는 사업 문서를 두지 않는다")로 막을 수 있었던 일이다.</p>
+<hr>
+<h2 id="1-objective-목적">1. Objective (목적)</h2>
+<blockquote><p>오프라인 매장이 본진인 핸드메이드 소품 브랜드의 온라인 채널을, 운영자가 개발자 없이 굴릴 수 있는 수준으로 만든다.</p></blockquote>
+<hr>
+<h2 id="2-background-배경">2. Background (배경)</h2>
+<p>PROJECT B 는 자체 제작 악세사리·소품을 파는 브랜드다. <strong>오프라인 매장이 메인이고 온라인이 추가</strong>다. 이 순서가 일반적인 쇼핑몰과 반대이며, 그 결과 설계가 두 군데에서 달라진다.</p>
+<ol><li><strong>Store Location 페이지가 핵심 페이지다.</strong> 보통 쇼핑몰에서 매장 안내는 부록이지만</li></ol>
+<p>여기서는 전환 목적지 중 하나다.</p>
+<ol><li><strong>상품 수가 10 ~ 50 개로 적다.</strong> 카탈로그 규모가 작으므로 검색·필터보다</li></ol>
+<p><strong>개별 상품 페이지의 밀도</strong>가 매출을 좌우한다. 이것이 상품 상세 블록형 CMS 와 AI 초안 기능이 들어온 이유다.</p>
+<p><strong>이전 시도</strong>: 없다. 기성 솔루션(카페24·스마트스토어) 대신 자체 구축을 택했고, 관리자 기능은 스마트스토어를 벤치마킹해 P0/P1 을 잘랐다 (<code>8f35d2b</code>).</p>
+<p><strong>운영자 제약이 설계를 지배한다.</strong> 발주처는 개발자가 아니다. 상품 하나를 올릴 때마다 개발자를 부르면 안 된다는 조건이 관리자 콘솔의 범위를 정했다.</p>
+<hr>
+<h2 id="3-related-documents-관련-문서">3. Related Documents (관련 문서)</h2>
+<div class="table-wrap"><table><thead><tr><th>문서</th><th>내용</th></tr></thead><tbody><tr><td><a href="../../CLAUDE.md"><code>CLAUDE.md</code></a></td><td>기술 스택·디자인 시스템·사이트맵 단일 원본</td></tr><tr><td><a href="../PROJECT_KNOWLEDGE_BASE.md"><code>docs/PROJECT_KNOWLEDGE_BASE.md</code></a></td><td>축적 지식</td></tr><tr><td><a href="../guides/ai-draft-review.md"><code>docs/guides/ai-draft-review.md</code></a></td><td>AI 초안 검수 가이드</td></tr><tr><td><a href="../research/ai-draft-v2-research.md"><code>docs/research/ai-draft-v2-research.md</code></a></td><td>AI 초안 v2 리서치</td></tr><tr><td><a href="../superpowers/plans/"><code>docs/superpowers/plans/</code></a></td><td>기능별 구현 계획</td></tr><tr><td><a href="../../supabase/"><code>supabase/</code></a></td><td>스키마·마이그레이션·시드</td></tr></tbody></table></div>
+<hr>
+<h2 id="4-goals-목표">4. Goals (목표)</h2>
+<ol><li><strong>운영자가 개발자 없이 상품을 올리고 판다.</strong> 등록·수정·발행·주문·회원·통계가 콘솔 안에서 끝난다.</li><li><strong>결제가 신뢰 가능하다.</strong> 클라이언트가 보낸 금액을 믿지 않고 서버가 PG 에 재확인한다.</li><li><strong>상품 페이지가 스스로 설득한다.</strong> 블록형 편집기와 AI 초안으로 상세 밀도를 올린다.</li><li><strong>LLM 이 쓴 문장이 검수 없이 대외로 나가지 않는다.</strong></li><li><strong>템플릿처럼 보이지 않는다.</strong> 브랜드가 디자인으로 식별된다.</li></ol>
+<h2 id="5-non-goals-비목표">5. Non-goals (비목표)</h2>
+<ul><li><strong>범용 쇼핑몰 솔루션을 만들지 않는다.</strong> 이 브랜드 하나에 맞춘다.</li><li><strong>다국어·해외 배송을 하지 않는다.</strong></li><li><strong>재고 자동 연동·ERP 연동을 하지 않는다.</strong> 상품 수가 적어 수동으로 감당된다.</li><li><strong>AI 가 상품 정보를 자동 발행하지 않는다.</strong> 초안까지만이고 발행은 사람이 한다.</li><li><strong>마이크로서비스로 쪼개지 않는다.</strong> 스토어프론트와 관리자가 같은 Next.js 배포다.</li><li><strong>Delfina(의류)를 이번 범위에서 만들지 않는다.</strong> DB 공유 규약(<code>pb_</code>/<code>df_</code> prefix)만 미리 정해둔다.</li></ul>
+<hr>
+<h2 id="6-scenarios-시나리오">6. Scenarios (시나리오)</h2>
+<h3 id="s1-고객이-상품을-사간다">S1. 고객이 상품을 사간다</h3>
+<ol><li>홈 또는 카테고리에서 상품을 고른다.</li><li>상품 상세에서 블록형 콘텐츠(이미지·텍스트·스펙)를 읽는다.</li><li>장바구니 → 체크아웃.</li><li>브라우저가 PortOne SDK 로 <strong>결제를 시작만</strong> 한다.</li><li><strong>서버가 PortOne API 로 결제 건을 다시 조회해 금액·상태를 검증</strong>한다.</li><li>검증을 통과해야 주문이 확정된다.</li></ol>
+<h3 id="s2-운영자가-상품을-올린다">S2. 운영자가 상품을 올린다</h3>
+<ol><li><code>/admin/products</code> 에서 상품을 등록한다.</li><li>등록 직후 <strong>AI 상세 초안 생성</strong>으로 이어진다 (<code>bc7559b</code>).</li><li>초안은 <code>draft</code> 상태로만 저장된다 — 아직 고객에게 보이지 않는다.</li><li>검수 UI 가 품질 표시와 함께 초안을 보여준다.</li><li>운영자가 고치고 <strong>발행</strong>을 눌러야 발행 경계를 넘는다.</li></ol>
+<h3 id="s3-llm-이-헛소리를-쓴다">S3. LLM 이 헛소리를 쓴다</h3>
+<ol><li>초안 생성 요청이 들어온다.</li><li><strong>비용 하드캡</strong>이 먼저 호출량을 막는다 (<code>9f760d7</code>).</li><li>Structured Outputs 로 스키마를 강제한다 — 포인트 개수까지 스키마로 보장한다 (<code>9da6629</code>).</li><li><strong>결정론적 카피 검사기</strong>가 상투어·이모지를 걸러낸다 (<code>2639a49</code>).</li><li><strong>LLM 비평가</strong>가 한 번 더 본다 (<code>863453e</code>).</li><li>그래도 남으면 <strong>운영자 검수</strong>가 마지막 관문이다.</li><li>제작 기법 환각은 별도로 차단했다 (<code>c291c8c</code>) — few-shot 오염이 원인이었다.</li></ol>
+<h3 id="s4-고객이-매장을-찾아온다">S4. 고객이 매장을 찾아온다</h3>
+<p>Store Location 페이지가 매장 정보와 지도를 보여준다. <strong>온라인 전환만큼 중요한 목적지다.</strong></p>
+<hr>
+<h2 id="7-diagrams-도면">7. Diagrams (도면)</h2>
+<ul><li><strong>시스템 구성</strong>: <a href="diagrams/architecture.html"><code>diagrams/architecture.html</code></a> — 원본 명세 <a href="diagrams/architecture.json"><code>architecture.json</code></a></li></ul>
+<p>archify 로 생성했고 <strong>JSON 명세가 원본, HTML 은 산출물</strong>이다.</p>
+<figure class="diagram"><pre class="mermaid">flowchart LR
+  O[&quot;운영자&quot;] --&gt; AD[&quot;관리자 콘솔&lt;br/&gt;/admin · 동일 배포&quot;]
+  C[&quot;고객&quot;] --&gt;|HTTPS| W[&quot;Next.js 14&lt;br/&gt;스토어프론트&quot;]
+  W --&gt;|&quot;fetch · 서버 액션&quot;| A[&quot;Route Handlers&lt;br/&gt;서버 전용&quot;]
+  AD --&gt;|운영 API| A
+  A --&gt;|&quot;결제 대사 · 웹훅 검증&quot;| P[&quot;PortOne V2&quot;]
+  A --&gt;|&quot;초안 생성 · 비용 캡&quot;| L[&quot;Claude&quot;]
+  A --&gt;|&quot;SQL · RLS&quot;| DB[(&quot;Supabase&lt;br/&gt;PostgreSQL · Auth&quot;)]
+  A --&gt;|서명 업로드| R[&quot;Cloudflare R2&quot;]</pre></figure>
+<hr>
+<h2 id="8-glossary-용어">8. Glossary (용어)</h2>
+<div class="table-wrap"><table><thead><tr><th>용어</th><th>뜻</th></tr></thead><tbody><tr><td><strong>발행 경계 (publish boundary)</strong></td><td>LLM 초안이 <code>draft</code> 에서 고객에게 보이는 상태로 넘어가는 지점. 사람 검수가 유일한 통과 수단이다</td></tr><tr><td><strong>품질 루프 (quality loop)</strong></td><td>생성 → 검사 → 재생성을 정해진 횟수만 도는 bounded 반복. 무한 재시도를 막는다</td></tr><tr><td><strong>결정론적 카피 검사</strong></td><td>LLM 없이 규칙으로 잡는 검사 (상투어·이모지·금칙어). LLM 비평가보다 앞단에 둔다</td></tr><tr><td><strong>비용 하드캡</strong></td><td>LLM API 호출 비용의 절대 상한. 넘으면 호출 자체를 거부한다</td></tr><tr><td><strong>RLS</strong></td><td>Supabase PostgreSQL 의 Row Level Security. 권한을 DB 가 집행한다</td></tr><tr><td><strong>Industrial Minimal</strong></td><td>이 프로젝트의 디자인 방향. 모든 모서리 직각, 대문자 제목, 흑백 기조</td></tr></tbody></table></div>
+<hr>
+<h2 id="9-constraints-제약">9. Constraints (제약)</h2>
+<ul><li><strong>운영자가 비개발자다.</strong> 콘솔에서 안 되는 일은 사실상 안 되는 일이다.</li><li><strong>개인사업자 · 통신판매업 신고 완료.</strong> 전자상거래법상 표시 의무가 따라온다.</li><li><strong>세금계산서 발행이 필요하다.</strong> 기업 고객이 있다.</li><li><strong>도메인 <code>projectB.com</code> 이 이미 사용 중이다.</strong> 대안 미정 — 발행 전에 정해야 한다 (§19 O2).</li><li><strong>후속 Delfina 와 Supabase DB 를 공유한다.</strong> 테이블 prefix 로 분리(<code>pb_</code>/<code>df_</code>)하기로 했고,</li></ul>
+<p>이 규약은 지금 어기면 나중에 되돌리기 어렵다.</p>
+<ul><li><strong>상품 수가 10 ~ 50 개다.</strong> 대규모 검색·추천 인프라가 필요 없다.</li></ul>
+<hr>
+<h2 id="10-service-level-objectives-slo">10. Service Level Objectives (SLO)</h2>
+<p><strong>정량 SLO 가 정의돼 있지 않다.</strong> 부하 시험이나 프로덕션 지연 분포 수집을 한 기록이 없다. 지금 이 문서에서 목표치를 지어내지 않는다.</p>
+<p>측정 없이 말할 수 있는 것은 구조적 사실뿐이다.</p>
+<div class="table-wrap"><table><thead><tr><th>항목</th><th>현재 상태</th></tr></thead><tbody><tr><td>가용성</td><td>Vercel · Supabase 의 관리형 가용성에 전적으로 의존 (자체 다중화 없음)</td></tr><tr><td>지연</td><td>미측정</td></tr><tr><td>규모</td><td>상품 10 ~ 50 개, 트래픽 목표 미정의</td></tr><tr><td>결제 정합성</td><td>서버 재검증으로 구조적 보장. <strong>다만 실패 재시도·부분 실패 처리는 미확인</strong></td></tr></tbody></table></div>
+<p>§19 O4 로 남긴다.</p>
+<hr>
+<h2 id="11-monitoring-alerting-관측-알림">11. Monitoring / Alerting (관측·알림)</h2>
+<p><strong>전용 관측 스택이 없다.</strong> Vercel 과 Supabase 의 기본 대시보드에 의존한다.</p>
+<ul><li><strong>AI 초안</strong>: 비용 가드(<code>cost-guard.ts</code>)가 사용량을 추적하고 상한에서 차단한다.</li></ul>
+<p><code>.ai-draft-usage.json</code> 이 사용량 상태를 들고 있다.</p>
+<ul><li><strong>평가 하네스</strong>: <code>src/lib/ai-draft/eval/</code> 에 생성 품질 평가 장치가 있다.</li></ul>
+<p>이건 관측이라기보다 회귀 방지에 가깝다.</p>
+<ul><li><strong>알림 <span class="unverified">미확인</span></strong>: 결제 실패·주문 이상에 대한 알림 경로를 확인하지 못했다.</li></ul>
+<p>Kakao Alimtalk 이 <code>CLAUDE.md</code> 아키텍처 도식에 있으나 구현 여부는 확인하지 않았다.</p>
+<p><strong>이건 알려진 공백이다</strong> (§19 O4). 돈을 받는 시스템에 결제 실패 알림이 없다면 그건 설계 결함이다.</p>
+<hr>
+<h2 id="12-timeline-마일스톤">12. Timeline (마일스톤)</h2>
+<div class="table-wrap"><table><thead><tr><th>시기</th><th>마일스톤</th><th>남은 산출물</th></tr></thead><tbody><tr><td>2026-03-31</td><td>홈 페이지</td><td>첫 PR, 디자인 시스템 적용</td></tr><tr><td>2026-04 초</td><td>P2 — 인증 · 결제 · 주문</td><td>PortOne V2 연동, 서버 검증</td></tr><tr><td>2026-04</td><td>관리자 Phase 1 ~ 3</td><td>기반 · 상품 · 리뷰/문의/공지</td></tr><tr><td>2026-04</td><td>매거진 · 테마 스위처</td><td>—</td></tr><tr><td>2026-05 ~ 06</td><td>관리자 P5</td><td>회원 관리, 통계 대시보드(recharts 6 종), 블록형 CMS 편집기</td></tr><tr><td>2026-07</td><td>관리자 v2</td><td>스마트스토어 벤치마킹 P0/P1, RLS 재귀 해결</td></tr><tr><td>2026-08</td><td>AI 초안 v1 → v2</td><td>환각 격리, 비용 캡, 품질 루프, 법정 고지 블록, 발행 게이트</td></tr></tbody></table></div>
+<hr>
+<h2 id="13-interfaces-인터페이스">13. Interfaces (인터페이스)</h2>
+<h3 id="사용자-인터페이스">사용자 인터페이스</h3>
+<div class="table-wrap"><table><thead><tr><th>영역</th><th>라우트</th></tr></thead><tbody><tr><td>스토어프론트</td><td><code>/</code>, <code>/category</code>, <code>/product/[slug]</code>, <code>/cart</code>, <code>/checkout</code>, <code>/order-complete</code></td></tr><tr><td>브랜드</td><td><code>/brand</code>, <code>/magazine</code>, <strong><code>/store-location</code></strong></td></tr><tr><td>고객</td><td><code>/mypage</code>, <code>/auth</code>, <code>/reviews</code>, <code>/cs</code>, <code>/notice</code></td></tr><tr><td>법정</td><td><code>/terms</code>, <code>/privacy</code></td></tr><tr><td>관리자</td><td><code>/admin/{products,orders,members,stats,content,magazine,marketing,notices,inquiries,settings,drafts}</code></td></tr></tbody></table></div>
+<h3 id="api">API</h3>
+<p>Next.js Route Handler <strong>55 개</strong>. 그룹: <code>admin</code> · <code>auth</code> · <code>checkout</code> · <code>orders</code> · <code>reviews</code> · <code>inquiries</code> · <code>notices</code> · <code>faq</code> · <code>search</code> · <code>settings</code>.</p>
+<h3 id="디자인-시스템-인터페이스-계약으로-취급한다">디자인 시스템 (인터페이스 계약으로 취급한다)</h3>
+<p><code>CLAUDE.md</code> 에 규칙이 명문화돼 있고 <strong>위반이 곧 버그</strong>다.</p>
+<ul><li>모든 모서리 <code>border-radius: 0</code></li><li>제목은 대문자 + 넓은 자간 (0.15 ~ 0.25 em)</li><li>제목 <strong>Archivo</strong>, 본문 <strong>Pretendard Variable</strong></li><li>흑백 기조 + 세일 레드 단일 액센트</li><li>상품 이미지 1:1</li><li><em>"Generic AI aesthetic is STRICTLY FORBIDDEN"</em> — Inter · Roboto · 보라 그라디언트 금지</li></ul>
+<hr>
+<h2 id="14-dependencies-infrastructure-의존성-인프라">14. Dependencies / Infrastructure (의존성·인프라)</h2>
+<p><strong>바꾸기 어려운 결정만 적는다.</strong></p>
+<div class="table-wrap"><table><thead><tr><th>층</th><th>선택</th><th>바꾸기 어려운 이유</th></tr></thead><tbody><tr><td>언어·프레임워크</td><td>TypeScript (strict) / Next.js 14 App Router</td><td>스토어프론트와 관리자가 <strong>한 배포</strong>라는 구조가 여기서 나온다</td></tr><tr><td>데이터</td><td>Supabase PostgreSQL</td><td>권한을 <strong>RLS 로 DB 가 집행</strong>한다 — 앱 레벨 권한 체크로 되돌리기 어렵다</td></tr><tr><td>인증</td><td>Supabase Auth (카카오·네이버·구글)</td><td>세션 모델이 RLS 정책과 묶여 있다</td></tr><tr><td>이미지</td><td>Cloudflare R2</td><td><strong>파일 저장소를 이원화하지 않는다</strong> — Supabase Storage 를 쓰지 않기로 했다</td></tr><tr><td>결제</td><td><strong>PortOne V2</strong> (<code>@portone/browser-sdk/v2</code>)</td><td>결제 대사 로직과 웹훅 계약이 PG 에 묶인다</td></tr><tr><td>LLM</td><td>Anthropic Messages API <strong>직접 호출</strong> (SDK 미사용)</td><td>비용 가드·품질 루프를 호출 경로에 직접 끼우기 위함</td></tr><tr><td>배포</td><td>Vercel</td><td>—</td></tr><tr><td>상태</td><td>Zustand (클라이언트)</td><td>—</td></tr></tbody></table></div>
+<blockquote><p><strong>README 와 코드가 불일치한다.</strong> <code>README.md:14</code> 는 <code>Payment: Tosspayments</code> 라고 적혀 있으나 실제 코드는 PortOne V2 다 (<code>src/app/checkout/page.tsx</code>, <code>src/app/api/checkout/route.ts</code>). <code>CLAUDE.md</code> 는 PortOne 으로 맞다. <strong>README 가 틀렸다</strong> — §19 O3.</p></blockquote>
+<hr>
+<h2 id="15-security-보안">15. Security (보안)</h2>
+<ul><li><strong>신뢰 경계</strong>: 브라우저 ↔ Route Handler. <strong>클라이언트가 보낸 금액을 신뢰하지 않는다.</strong></li><li><strong>결제</strong>: 브라우저는 PortOne SDK 로 결제를 시작만 하고,</li></ul>
+<p>서버가 <code>GET https://api.portone.io/payments/{paymentId}</code> 로 재조회해 검증한다. API Secret 은 서버 전용 환경변수다.</p>
+<ul><li><strong>권한</strong>: Supabase RLS 가 DB 레벨에서 집행한다. 앱이 우회할 수 없다.</li></ul>
+<p>RLS 정책 재귀 문제를 한 번 겪고 해결했다 (<code>77d416d</code>).</p>
+<ul><li><strong>차단 사용자</strong>: <code>BlockedError</code> + <code>assertNotBlocked</code> 가드 (<code>9df6b08</code>).</li><li><strong>XSS</strong>: 상세 블록은 <strong>서버 사이드 HTML 새니타이저</strong>를 거친다 (<code>c79a1a9</code>).</li></ul>
+<p>블록형 CMS 가 HTML 을 다루므로 이 경로가 핵심 공격 표면이다.</p>
+<ul><li><strong>비밀값</strong>: 환경변수로만 주입. <code>.env</code> 는 추적되지 않는다.</li><li><strong>미검토 <span class="unverified">미확인</span></strong>: CSP 헤더, PortOne 웹훅 서명 검증 여부,</li></ul>
+<p>관리자 라우트의 rate limiting 을 이 문서에서 확인하지 않았다.</p>
+<h2 id="16-privacy-프라이버시">16. Privacy (프라이버시)</h2>
+<ul><li><strong>다루는 민감 데이터</strong>: 회원 식별자, 주문 내역, <strong>배송지 주소</strong>, 결제 참조 정보.</li></ul>
+<p>배송지는 실주소이고 가장 민감한 축이다.</p>
+<ul><li><strong>저장 위치</strong>: Supabase PostgreSQL. 접근은 RLS 로 제한.</li><li><strong>결제 정보</strong>: 카드 정보는 보유하지 않는다 — PG 가 처리하고 참조 ID 만 받는다.</li><li><strong>정책 문서</strong>: <code>/privacy</code>, <code>/terms</code> 페이지와 <code>docs/개인정보처리방침.md</code>, <code>docs/이용약관.md</code>.</li><li><strong>보관 기간 <span class="unverified">미확인</span></strong>: 주문·회원 데이터 보관 기간 정책이 코드에 구현돼 있는지 확인하지 않았다.</li></ul>
+<p>전자상거래법상 거래 기록 보존 의무(5 년)와 개인정보보호법상 파기 의무가 충돌하는 지점이라 확인이 필요하다 (§19 O5).</p>
+<h2 id="17-legal-considerations-법적-고려">17. Legal Considerations (법적 고려)</h2>
+<ul><li><strong>전자상거래법</strong>: 통신판매업 신고 완료. 사업자 정보·청약철회·교환반품 고지 표시 의무.</li></ul>
+<p>AI 초안 v2 에 <strong>법정 고지 블록</strong>이 레시피로 들어간 이유가 이것이다 (<code>5570827</code>).</p>
+<ul><li><strong>세금계산서</strong>: 기업 고객 대상 발행 필요.</li><li><strong>라이선스 <span class="unverified">미확인</span></strong>: 저장소가 <strong>공개인데 LICENSE 파일이 확인되지 않는다.</strong></li></ul>
+<p>라이선스 없는 공개 저장소는 기본적으로 All Rights Reserved 지만, 공개 의도와 실제 권리 상태가 일치하는지 명시해야 한다 (§19 O1).</p>
+<ul><li><strong>AI 생성 문구의 책임</strong>: 상품 설명은 표시광고법 적용 대상이다.</li></ul>
+<p>발행 경계에 사람 검수를 둔 것은 기술적 선택이자 <strong>법적 책임 구조</strong>다.</p>
+<h2 id="18-logging-로깅">18. Logging (로깅)</h2>
+<ul><li><strong>AI 초안</strong>: 호출 비용·사용량을 <code>cost-guard</code> 가 기록한다.</li><li><strong>애플리케이션 로그</strong>: Vercel 기본 로그에 의존한다. 구조화 로깅 계층이 없다.</li><li><strong>감사 로그 <span class="unverified">미확인</span></strong>: 관리자 작업(상품 수정·회원 차단·주문 상태 변경)에 대한</li></ul>
+<p>감사 로그가 있는지 확인하지 않았다. 운영자가 여럿이 되면 필요해진다.</p>
+<ul><li><strong>민감값 제외 <span class="unverified">미확인</span></strong>: 로그에서 주소·연락처가 마스킹되는지 확인하지 않았다.</li></ul>
+<hr>
+<h2 id="19-open-issues-미결-이슈">19. Open Issues (미결 이슈)</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>문제</th><th>선택지</th><th>다음 행동</th></tr></thead><tbody><tr><td><strong>O1</strong></td><td><strong>공개 저장소에 사업 문서가 커밋돼 있다.</strong> <code>docs/contracts/</code> 의 용역계약서·견적서 PDF, <code>docs/guides/</code> 의 사장님 계정생성 가이드가 <code>git ls-files</code> 에 잡힌다</td><td>(a) 저장소를 비공개로 전환 (b) 해당 파일을 히스토리에서 제거하고 <code>.gitignore</code> 에 추가 (c) 발주처 동의 하에 유지</td><td><strong>발주처에 먼저 알린다.</strong> 히스토리 재작성은 되돌릴 수 없으므로 결정 전에 실행하지 않는다</td></tr><tr><td><strong>O2</strong></td><td>도메인 미정. <code>projectB.com</code> 사용 중</td><td>—</td><td>발행 전에 확정. SEO·OG·메일 발신 도메인이 여기 묶인다</td></tr><tr><td><strong>O3</strong></td><td>README 의 결제 PG 표기가 코드와 다르다 (Tosspayments ↔ PortOne V2)</td><td>—</td><td>README 를 고친다. 단순 오기이지만 공개 문서라 오해 비용이 있다</td></tr><tr><td><strong>O4</strong></td><td><strong>결제 실패·주문 이상 알림 경로가 확인되지 않는다</strong></td><td>(a) Alimtalk 연동 (b) 이메일 (c) 관리자 대시보드 배지</td><td>실패 시 아무도 모르는 상태인지부터 확인한다</td></tr><tr><td><strong>O5</strong></td><td>개인정보 보관·파기 정책이 코드에 구현됐는지 미확인</td><td>—</td><td>전자상거래법 보존 의무와 개인정보 파기 의무의 경계를 정리한다</td></tr><tr><td><strong>O6</strong></td><td>LICENSE 파일 부재 (공개 저장소)</td><td>—</td><td>공개 의도를 확정하고 명시한다</td></tr><tr><td><strong>O7</strong></td><td>Delfina 와의 DB 공유 규약(<code>pb_</code>/<code>df_</code>)이 실제 스키마에 일관 적용됐는지 미검증</td><td>—</td><td><code>supabase/schema.sql</code> 을 prefix 기준으로 감사한다</td></tr></tbody></table></div>
+<h2 id="20-resolved-issues-해결된-이슈">20. Resolved Issues (해결된 이슈)</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>문제</th><th>결정</th><th>근거</th></tr></thead><tbody><tr><td><strong>R1</strong></td><td>LLM 이 <strong>제작 기법을 지어냈다</strong></td><td>few-shot 오염 제거 + 기법 환각 차단</td><td><code>c291c8c</code> — 예시가 모델을 오염시키고 있었다</td></tr><tr><td><strong>R2</strong></td><td>LLM 초안이 검수 없이 나갈 수 있었다</td><td><strong>발행 경계</strong> 도입 — 초안은 <code>draft</code> 로만 저장, 발행은 사람이</td><td><code>cadb700</code> "AI 상품 상세페이지 초안 → 운영자 검수/발행 분리 (환각 격리)"</td></tr><tr><td><strong>R3</strong></td><td>LLM 비용이 무제한이었다</td><td><strong>하드캡 가드</strong></td><td><code>9f760d7</code></td></tr><tr><td><strong>R4</strong></td><td>생성 결과의 포인트 개수가 들쭉날쭉했다</td><td>Structured Outputs 로 스키마 강제</td><td><code>9da6629</code></td></tr><tr><td><strong>R5</strong></td><td>품질 검사를 LLM 에만 맡기면 느리고 비쌌다</td><td><strong>결정론적 카피 검사기</strong>를 앞단에, LLM 비평가를 뒤에</td><td><code>2639a49</code>, <code>863453e</code></td></tr><tr><td><strong>R6</strong></td><td>Supabase <strong>RLS 정책이 재귀</strong>해 관리자 화면이 깨졌다</td><td>정책 재작성</td><td><code>77d416d</code></td></tr><tr><td><strong>R7</strong></td><td>상세 블록이 HTML 을 그대로 렌더해 XSS 위험이 있었다</td><td>서버 사이드 새니타이저</td><td><code>c79a1a9</code></td></tr><tr><td><strong>R8</strong></td><td>이모지 정규식이 ES5 타깃에서 깨졌다</td><td>ES5 호환 표현으로 수정</td><td><code>4247d54</code></td></tr></tbody></table></div>
+<hr>
+<h2 id="21-alternatives-considered-검토한-대안">21. Alternatives Considered (검토한 대안)</h2>
+<p><strong>기성 솔루션 (카페24 · 스마트스토어 · 쇼피파이)</strong> — 기각. 다만 <strong>관리자 UX 는 스마트스토어를 벤치마킹</strong>해 P0/P1 을 잘랐다 (<code>8f35d2b</code>). 쓸 만한 부분만 가져오고 플랫폼 종속은 피한 선택이다.</p>
+<p><strong>Supabase Storage</strong> — 기각. 파일 저장소를 R2 와 이원화하지 않기로 했다. 같은 종류의 자산이 두 곳에 나뉘면 URL 규칙·백업·비용이 모두 두 벌이 된다.</p>
+<p><strong>Anthropic SDK 사용</strong> — 기각. Messages API 를 직접 호출한다. 비용 가드·품질 루프·스텁 프로바이더를 호출 경로에 직접 끼워야 했고, SDK 추상화가 그 지점을 가렸다. 대신 <code>anthropic-client.ts</code> 를 직접 유지보수하는 비용을 진다.</p>
+<p><strong>AI 자동 발행</strong> — 기각. 표시광고법 책임과 환각 위험을 고려하면 사람 검수 없는 발행은 선택지가 아니었다. 대신 검수 비용을 줄이는 쪽 (결정론적 검사 + LLM 비평가 + 품질 표시 UI)에 투자했다.</p>
+<p><strong>앱 레벨 권한 체크</strong> — 기각. RLS 로 DB 가 집행한다. 재귀 문제(R6)로 한 번 대가를 치렀지만, 앱 코드가 권한을 우회할 수 없다는 성질이 더 컸다.</p>
+<p><strong>스토어프론트와 관리자 분리 배포</strong> — 기각. 같은 Next.js 앱으로 유지한다. <code>CLAUDE.md</code> 의 조직 구상에는 <code>admin-dashboard</code> 를 별도 저장소로 두는 그림이 있으나, 현재 구현은 단일 배포다. <strong>구상과 구현이 다르다</strong> — 구상 쪽을 갱신해야 한다.</p>
+<hr>
+<h2 id="22-설계-리뷰-q-a">22. 설계 리뷰 Q&amp;A</h2>
+<article class="qa">
+<p class="qa-q"><strong>Q1. 왜 스토어프론트와 관리자를 한 배포에 넣었나? 공격 표면이 커지지 않나?</strong></p>
+<p class="qa-a">A. 커진다. 대신 1 인 개발에서 배포 대상·인증 세션·타입 정의가 한 벌로 유지된다. 공격 표면 문제는 <strong>RLS 로 DB 가 권한을 집행</strong>하게 해서 막았다 — 관리자 라우트에 접근해도 DB 가 거부한다. 다만 <code>CLAUDE.md</code> 의 조직 구상에는 <code>admin-dashboard</code> 를 별도 저장소로 두는 그림이 남아 있어 <strong>문서와 구현이 어긋나 있다.</strong></p>
+<p class="status"><span class="badge badge-resolved">Resolved (단일 배포 유지), 문서 갱신 필요</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q2. 결제를 클라이언트에서 시작하는데 안전한가?</strong></p>
+<p class="qa-a">A. 시작은 클라이언트가, <strong>검증은 서버가</strong> 한다. 서버가 <code>api.portone.io</code> 로 결제 건을 다시 조회해 금액·상태를 확인하고, 통과해야 주문이 확정된다. 클라이언트가 보낸 금액은 어느 단계에서도 신뢰되지 않는다. 미확인으로 남은 건 <strong>웹훅 서명 검증</strong>과 <strong>부분 실패 재시도</strong>다 (§19 O4).</p>
+<p class="status"><span class="badge badge-open">Resolved (검증 구조), 재시도·웹훅은 Open</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q3. AI 초안 기능이 과한 것 아닌가? 상품이 10 ~ 50 개인데.</strong></p>
+<p class="qa-a">A. 상품 수가 적다는 게 오히려 이유다. 카탈로그가 작으면 <strong>개별 페이지의 밀도</strong>가 매출을 좌우하고, 비개발자 운영자가 상세 페이지를 매번 채우는 건 실제로 병목이다. 다만 v1 은 과했던 게 맞다 — 환각이 나왔고(R1), 발행 경계를 뒤늦게 넣었다(R2). <strong>v2 에서 순서를 바로잡았다</strong>: 비용 캡 → 스키마 강제 → 결정론적 검사 → LLM 비평가 → 사람 검수.</p>
+<p class="status"><span class="badge badge-resolved">Resolved (v2, 2026-08)</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q4. LLM 비평가를 쓰면서 결정론적 검사기를 따로 둔 이유는?</strong></p>
+<p class="qa-a">A. 비용과 확실성이다. 상투어·이모지·금칙어는 규칙으로 100 % 잡히는데 LLM 에 물어보면 돈이 들고 결과가 흔들린다. 싼 것과 확실한 것을 앞에, 비싼 것과 애매한 것을 뒤에 둔다. 품질 루프는 <strong>bounded</strong> 라 무한 재시도하지 않는다.</p>
+<p class="status"><span class="badge badge-resolved">Resolved</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q5. Store Location 이 왜 핵심 페이지인가? 쇼핑몰인데.</strong></p>
+<p class="qa-a">A. 오프라인이 메인이기 때문이다. 이 브랜드에서 온라인은 추가 채널이고, 매장 방문이 여전히 주된 전환이다. 일반 쇼핑몰 템플릿을 그대로 가져왔다면 매장 안내가 푸터 링크로 밀려났을 것이고, 그건 이 사업에 대한 오해다.</p>
+<p class="status"><span class="badge badge-resolved">Resolved (범위 결정)</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q6. 디자인 규칙이 지나치게 세세하지 않나? <code>border-radius: 0</code> 같은 것까지 문서에 박을 일인가?</strong></p>
+<p class="qa-a">A. 박을 일이다. <code>CLAUDE.md</code> 에 <em>"Generic AI aesthetic is STRICTLY FORBIDDEN"</em> 이라고 적혀 있고, 이건 취향이 아니라 <strong>브랜드 식별성</strong> 문제다. 규칙이 느슨하면 기본값(Inter · 둥근 모서리 · 보라 그라디언트)으로 수렴하고, 그러면 이 브랜드가 다른 수천 개 쇼핑몰과 구분되지 않는다. 그래서 디자인 규칙을 <strong>인터페이스 계약</strong>으로 취급하고 위반을 버그로 본다.</p>
+<p class="status"><span class="badge badge-resolved">Resolved</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q7. 관측·알림이 없는데 돈 받는 시스템으로 괜찮은가?</strong></p>
+<p class="qa-a">A. 괜찮지 않다. 이건 방어할 생각이 없는 공백이다. 결제가 실패하거나 주문이 이상한 상태로 남아도 <strong>지금은 아무도 모를 가능성이 있다.</strong> <code>CLAUDE.md</code> 도식에 Kakao Alimtalk 이 있지만 구현 여부를 확인하지 못했다. park-mate 에서는 OTel·부하 게이트까지 갔는데 이쪽은 안 한 것이 프로젝트 간 우선순위의 불균형을 보여준다.</p>
+<p class="status"><span class="badge badge-open">Open (§19 O4) — 우선순위 최상위</span></p>
+</article>
+<article class="qa">
+<p class="qa-q"><strong>Q8. 공개 저장소에 계약서가 들어간 건 어떻게 된 일인가?</strong></p>
+<p class="qa-a">A. <code>docs/</code> 아래에 참고 자료를 모으다가 <code>.gitignore</code> 없이 통째로 커밋됐다. 저장소가 공개라 <strong>용역계약서·견적서 PDF 가 누구나 받을 수 있는 상태</strong>다. 이건 설계문서 §16·§17 이 존재했다면 착수 시점에 걸렸을 항목이다. 히스토리 재작성은 되돌릴 수 없고 발주처와 관련된 문서이므로, <strong>내 판단으로 지우지 않고 먼저 알리는 것</strong>이 맞다.</p>
+<p class="status"><span class="badge badge-open">Open (§19 O1) — 발주처 통지 필요</span></p>
+</article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="inner">
+    <span>PROJECT B 설계문서</span>
+    <span>작성 2026-09-16</span>
+    <span>원본 <code>docs/design/DESIGN.md</code></span>
+    <a href="https://refactoringenglish.com/excerpts/write-an-effective-design-doc/">템플릿 출처: Refactoring English</a>
+  </div>
+</footer>
+
+<script type="module">
+  const root = document.documentElement;
+  const KEY = 'design-doc-theme';
+  let stored = null;
+  try { stored = localStorage.getItem(KEY); } catch {}
+  if (stored) root.dataset.theme = stored;
+
+  const prefersDark = () => root.dataset.theme
+    ? root.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = prefersDark() ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem(KEY, next); } catch {}
+    renderMermaid(next);
+  });
+
+  // 목차 활성 표시
+  const links = new Map();
+  document.querySelectorAll('.toc a').forEach(a => links.set(a.getAttribute('href').slice(1), a));
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      const a = links.get(e.target.id);
+      if (a && e.isIntersecting) {
+        document.querySelectorAll('.toc a.is-active').forEach(x => x.classList.remove('is-active'));
+        a.classList.add('is-active');
+      }
+    });
+  }, { rootMargin: '-72px 0px -76% 0px' });
+  document.querySelectorAll('.doc h2[id]').forEach(h => obs.observe(h));
+
+  // Mermaid (선택적 — CDN 실패 시 코드 블록으로 남는다)
+  let mermaid;
+  const sources = [...document.querySelectorAll('pre.mermaid')].map(el => el.textContent);
+  async function renderMermaid(theme) {
+    if (!sources.length) return;
+    try {
+      mermaid ??= (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+    } catch { return; }
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: (theme ?? (prefersDark() ? 'dark' : 'default')) === 'dark' ? 'dark' : 'default',
+      fontFamily: getComputedStyle(document.body).fontFamily,
+    });
+    const nodes = document.querySelectorAll('pre.mermaid');
+    nodes.forEach((el, i) => { el.removeAttribute('data-processed'); el.textContent = sources[i]; });
+    await mermaid.run({ nodes });
+  }
+  renderMermaid();
+</script>
+</body>
+</html>
